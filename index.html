@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>eVidya - Tech Courses Platform</title>
+		<link rel="stylesheet" href="./css/style.css" />
+		<link rel="stylesheet" href="./css/placeholder-images.css" />
+		<link rel="stylesheet" href="./css/enhanced-buttons.css" />
+		<!-- Ensure favicon is properly referenced -->
+		<link rel="icon" type="image/x-icon" href="./favicon.ico" />
+		<!-- Load main.js first to initialize path handling -->
+		<script src="./js/main.js"></script>
+	</head>
+	<body>
+		<header>
+			<div class="container">
+				<h1>eVidya Tech Courses</h1>
+				<p>
+					Expand your knowledge with our interactive technology
+					courses
+				</p>
+			</div>
+		</header>
+
+		<main class="container">
+			<section class="welcome-section">
+				<h2>Welcome to the Tech Courses Platform</h2>
+				<p>
+					Explore our collection of tech courses designed to help you
+					master various technologies and programming languages. Track
+					your progress, complete quizzes, and enhance your skills at
+					your own pace.
+				</p>
+				<div class="cta-button">
+					<a
+						href="./pages/courses.html"
+						class="btn primary-btn"
+						id="view-courses-btn"
+						>View Courses</a
+					>
+				</div>
+			</section>
+
+			<section class="features-section">
+				<h2>Platform Features</h2>
+				<div class="features-grid">
+					<div class="feature-card">
+						<h3>Interactive Courses</h3>
+						<p>
+							Learn through video lessons and hands-on exercises
+						</p>
+					</div>
+					<div class="feature-card">
+						<h3>Progress Tracking</h3>
+						<p>Monitor your advancement through each course</p>
+					</div>
+					<div class="feature-card">
+						<h3>Knowledge Assessment</h3>
+						<p>
+							Test your understanding with quizzes and get instant
+							feedback
+						</p>
+					</div>
+					<div class="feature-card">
+						<h3>Offline Access</h3>
+						<p>
+							Your progress is saved locally for convenient access
+						</p>
+					</div>
+				</div>
+			</section>
+		</main>
+
+		<footer>
+			<div class="container">
+				<p>
+					&copy; 2025 VKrishna04 eVidya Tech Courses Platform. All
+					rights reserved.
+				</p>
+			</div>
+		</footer>
+
+		<!-- Load scripts after DOM is ready -->
+		<script src="./js/storage.js"></script>
+		<script src="./js/course-data.js"></script>
+		<script src="./js/progress-tracker.js"></script>
+		<script>
+			// Add a direct event listener for the view courses button
+			document.addEventListener("DOMContentLoaded", function () {
+				const viewCoursesBtn =
+					document.getElementById("view-courses-btn");
+				if (viewCoursesBtn) {
+					viewCoursesBtn.addEventListener("click", function (e) {
+						e.preventDefault();
+						const coursesPath = window.getCorrectPath
+							? window.getCorrectPath("./pages/courses.html")
+							: "./pages/courses.html";
+						console.log("Navigating to courses page:", coursesPath);
+						window.location.href = coursesPath;
+					});
+				}
+
+				// Display number of available courses if data is available
+				if (window.courseData && window.courseData.courses) {
+					const courseCount = window.courseData.courses.length;
+					const welcomeMessage =
+						document.querySelector(".welcome-section p");
+					welcomeMessage.innerHTML += `<br><strong>${courseCount}</strong> courses available now!`;
+				}
+			});
+		</script>
+	</body>
+</html>

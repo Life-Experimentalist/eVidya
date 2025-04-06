@@ -1,0 +1,232 @@
+/* Main styles for the eVidya Learning Platform */
+
+:root {
+	--primary-color: #1a73e8;
+	--primary-dark: #0d47a1;
+	--secondary-color: #f1f8ff;
+	--text-color: #3c4043;
+	--text-light: #5f6368;
+	--border-color: #dadce0;
+	--success-color: #34a853;
+	--warning-color: #fbbc04;
+	--error-color: #ea4335;
+	--white: #ffffff;
+	--light-bg: #f8f9fa;
+	--shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+	--border-radius: 8px;
+	--transition: all 0.3s ease;
+}
+
+/* Reset and base styles */
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+body {
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	line-height: 1.6;
+	color: var(--text-color);
+	background-color: var(--secondary-color);
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+}
+
+main {
+	flex: 1;
+	padding: 20px;
+}
+
+a {
+	color: var(--primary-color);
+	text-decoration: none;
+	transition: var(--transition);
+}
+
+a:hover {
+	color: var(--primary-dark);
+}
+
+button {
+	cursor: pointer;
+	transition: var(--transition);
+}
+
+/* Header styles */
+header {
+	background-color: var(--primary-color);
+	color: var(--white);
+	padding: 15px 0;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.header-container {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 0 20px;
+}
+
+header h1 {
+	font-size: 24px;
+	font-weight: 600;
+	color: var(--white);
+}
+
+nav ul {
+	display: flex;
+	list-style: none;
+}
+
+nav ul li {
+	margin-left: 20px;
+}
+
+nav ul li a {
+	color: var(--white);
+	padding: 8px 12px;
+	border-radius: 4px;
+	font-weight: 500;
+}
+
+nav ul li a:hover,
+nav ul li a.active {
+	background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Footer styles */
+footer {
+	background-color: var(--primary-color);
+	color: var(--white);
+	text-align: center;
+	padding: 15px;
+	margin-top: auto;
+}
+
+/* Common components */
+.container {
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 0 20px;
+}
+
+.btn {
+	display: inline-block;
+	padding: 8px 16px;
+	border: none;
+	border-radius: var(--border-radius);
+	font-weight: 500;
+	text-align: center;
+	cursor: pointer;
+	transition: var(--transition);
+}
+
+.btn-primary {
+	background-color: var(--primary-color);
+	color: var(--white);
+}
+
+.btn-primary:hover {
+	background-color: var(--primary-dark);
+	transform: translateY(-2px);
+}
+
+.btn-secondary {
+	background-color: var(--light-bg);
+	color: var(--text-color);
+}
+
+.btn-secondary:hover {
+	background-color: var(--border-color);
+}
+
+.btn-danger {
+	background-color: var(--error-color);
+	color: var(--white);
+}
+
+.btn-danger:hover {
+	background-color: #d32f2f;
+}
+
+.card {
+	background-color: var(--white);
+	border-radius: var(--border-radius);
+	box-shadow: var(--shadow);
+	overflow: hidden;
+	transition: var(--transition);
+}
+
+.card:hover {
+	transform: translateY(-5px);
+	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Progress bar styles */
+.progress-container {
+	margin: 15px 0;
+}
+
+.progress-bar {
+	height: 10px;
+	background-color: var(--border-color);
+	border-radius: 5px;
+	overflow: hidden;
+}
+
+.progress-fill {
+	height: 100%;
+	background-color: var(--primary-color);
+	border-radius: 5px;
+	transition: width 0.3s ease;
+}
+
+/* Loading state */
+.loading {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	min-height: 200px;
+	font-size: 16px;
+	color: var(--text-light);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+	.header-container {
+		flex-direction: column;
+		padding: 10px;
+	}
+
+	header h1 {
+		margin-bottom: 10px;
+	}
+
+	nav ul {
+		width: 100%;
+		justify-content: center;
+	}
+
+	nav ul li {
+		margin: 0 10px;
+	}
+}
+
+@media (max-width: 576px) {
+	header h1 {
+		font-size: 20px;
+	}
+
+	nav ul li {
+		margin: 0 5px;
+	}
+
+	nav ul li a {
+		padding: 6px 8px;
+		font-size: 14px;
+	}
+}

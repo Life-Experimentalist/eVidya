@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Page Not Found - eVidya</title>
+		<link rel="stylesheet" href="css/style.css" />
+		<style>
+			.error-container {
+				text-align: center;
+				padding: 50px 20px;
+			}
+			.home-button {
+				display: inline-block;
+				margin-top: 20px;
+				padding: 10px 20px;
+				background-color: #4285f4;
+				color: white;
+				text-decoration: none;
+				border-radius: 4px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="error-container">
+			<h1>404 - Page Not Found</h1>
+			<p>
+				Sorry, the page you are looking for doesn't exist or has been
+				moved.
+			</p>
+			<a href="index.html" class="home-button" id="home-button"
+				>Back to eVidya Home</a
+			>
+		</div>
+
+		<script>
+			// Detect repository name for GitHub Pages
+			function getRepoName() {
+				const path = window.location.pathname;
+				const pathParts = path.split("/").filter((part) => part);
+
+				// For GitHub Pages in the format username.github.io/repo-name/
+				if (
+					pathParts.length > 0 &&
+					window.location.hostname.includes("github.io")
+				) {
+					return pathParts[0];
+				}
+
+				return "";
+			}
+
+			// Fix home button link for GitHub Pages
+			const homeButton = document.getElementById("home-button");
+			const repoName = getRepoName();
+			if (repoName) {
+				homeButton.href = `/${repoName}/index.html`;
+			}
+
+			// Redirect handling for SPA-like navigation on GitHub Pages
+			function tryRedirects() {
+				const path = window.location.pathname;
+				const pathSegments = path
+					.split("/")
+					.filter((segment) => segment !== "");
+
+				// Skip if we're already on a .html file
+				if (path.endsWith(".html")) return;
+
+				// If this appears to be a route, try to find the corresponding HTML file
+				if (pathSegments.length > 0) {
+					const lastSegment = pathSegments[pathSegments.length - 1];
+
+					// List of possible redirects to try
+					const redirectAttempts = [
+						`${path}.html`, // Add .html to current path
+						`${path}/index.html`, // Try index.html in current path
+						`/${pathSegments.join("/")}.html`, // Try with repo name if on GitHub Pages
+					];
+
+					// If it looks like a course page, try to redirect to functional-course.html
+					if (lastSegment && !lastSegment.includes(".")) {
+						// Store the ID to pass it as a parameter
+						localStorage.setItem("selectedCourseId", lastSegment);
+
+						// Determine base path
+						let basePath = "/";
+						if (repoName) {
+							basePath = `/${repoName}/`;
+						}
+
+						// Redirect to the course page with the ID as a parameter
+						window.location.href = `${basePath}pages/functional-course.html?courseId=${lastSegment}`;
+						return;
+					}
+
+					// Try each redirect possibility
+					for (const attemptPath of redirectAttempts) {
+						fetch(attemptPath)
+							.then((response) => {
+								if (response.ok) {
+									window.location.href = attemptPath;
+									return true;
+								}
+								return false;
+							})
+							.catch(() => false); // Ignore fetch errors and try next option
+					}
+				}
+			}
+
+			// Run redirect attempts
+			tryRedirects();
+		</script>
+	</body>
+</html>

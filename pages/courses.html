@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>eVidya - Courses</title>
+		<!-- Bootstrap CSS -->
+		<link
+			href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+			rel="stylesheet"
+		/>
+		<link rel="stylesheet" href="../css/style.css" />
+		<link rel="stylesheet" href="../css/courses.css" />
+		<link rel="stylesheet" href="../css/placeholder-images.css" />
+		<link rel="stylesheet" href="../css/enhanced-buttons.css" />
+	</head>
+	<body>
+		<header>
+			<div class="container">
+				<h1>eVidya Tech Courses</h1>
+				<p class="lead">
+					Enhance your skills with our curated collection of courses
+				</p>
+			</div>
+		</header>
+
+		<main class="container py-5">
+			<div class="courses-header text-center mb-5">
+				<h2>Available Tech Courses</h2>
+				<p class="lead">Select a course to start learning</p>
+			</div>
+
+			<div class="row g-4" id="courses-container">
+				<!-- Course cards will be dynamically loaded from browser storage -->
+				<p class="text-center">Loading courses...</p>
+			</div>
+
+			<div class="text-center mt-5 mb-4">
+				<a href="../index.html" class="btn secondary-btn"
+					>Back to Home</a
+				>
+			</div>
+		</main>
+
+		<footer>
+			<div class="container">
+				<p>
+					&copy; 2023 eVidya Tech Courses Platform. All rights
+					reserved.
+				</p>
+			</div>
+		</footer>
+
+		<!-- Bootstrap JS Bundle with Popper -->
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+		<script src="../js/main.js"></script>
+		<script src="../js/storage.js"></script>
+		<script src="../js/course-data.js"></script>
+		<script src="../js/progress-tracker.js"></script>
+		<script src="../js/courses.js"></script>
+		<script>
+			// Function to navigate to a course
+			function navigateToCourse(courseId) {
+				if (typeof courseId === "object") {
+					// If it's coming from inline HTML event, convert to string
+					courseId = courseId.toString();
+				}
+
+				// Store selected course ID
+				localStorage.setItem("selectedCourseId", courseId);
+
+				// Navigate to the course page with the correct path
+				const coursePath = window.getCorrectPath
+					? window.getCorrectPath(
+							"./functional-course.html?courseId=" + courseId
+					  )
+					: "./functional-course.html?courseId=" + courseId;
+
+				console.log("Navigating to course:", coursePath);
+				window.location.href = coursePath;
+				return false; // Prevent default action
+			}
+		</script>
+	</body>
+</html>
