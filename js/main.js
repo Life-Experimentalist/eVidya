@@ -96,7 +96,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		coursesButton.addEventListener("click", function (e) {
 			// Use the correct path function for navigation
 			e.preventDefault();
-			const targetPath = window.getCorrectPath("./pages/courses.html");
+			const targetPath = window.getCorrectPath("./pages/catalogue.html");
 			console.log("Navigating to:", targetPath);
 			window.location.href = targetPath;
 		});
@@ -104,3 +104,128 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	console.log("eVidya Platform initialized successfully!");
 });
+
+// Function to get placeholder data (for development/when API is not available)
+function getPlaceholderData(type) {
+	if (type === "courses") {
+		return [
+			{
+				id: "course1",
+				title: "Introduction to JavaScript",
+				description:
+					"Learn the basics of JavaScript programming language, including variables, functions, and DOM manipulation.",
+				difficulty: "Beginner",
+				image: "../images/placeholder-1.jpg",
+				sections: [
+					{
+						title: "Getting Started",
+						videos: [
+							{ title: "Introduction", duration: "05:30" },
+							{
+								title: "Setting Up Your Environment",
+								duration: "08:45",
+							},
+						],
+					},
+					{
+						title: "JavaScript Basics",
+						videos: [
+							{
+								title: "Variables and Data Types",
+								duration: "10:15",
+							},
+							{ title: "Functions and Scope", duration: "12:30" },
+						],
+					},
+				],
+			},
+			{
+				id: "course2",
+				title: "Advanced CSS Techniques",
+				description:
+					"Master advanced CSS techniques including Flexbox, Grid, animations, and responsive design patterns.",
+				difficulty: "Intermediate",
+				image: "../images/placeholder-2.jpg",
+				sections: [
+					{
+						title: "CSS Layout",
+						videos: [
+							{
+								title: "Flexbox Fundamentals",
+								duration: "11:20",
+							},
+							{ title: "CSS Grid Layout", duration: "14:50" },
+						],
+					},
+					{
+						title: "Animations",
+						videos: [
+							{ title: "CSS Transitions", duration: "08:10" },
+							{ title: "Keyframe Animations", duration: "09:45" },
+						],
+					},
+				],
+			},
+			{
+				id: "course3",
+				title: "Full Stack Web Development",
+				description:
+					"Build complete web applications with front-end and back-end technologies including Node.js, Express, and MongoDB.",
+				difficulty: "Advanced",
+				image: "../images/placeholder-3.jpg",
+				sections: [
+					{
+						title: "Backend Basics",
+						videos: [
+							{
+								title: "Node.js Introduction",
+								duration: "15:20",
+							},
+							{ title: "Express Framework", duration: "18:40" },
+						],
+					},
+					{
+						title: "Database Integration",
+						videos: [
+							{ title: "MongoDB Basics", duration: "14:30" },
+							{ title: "CRUD Operations", duration: "16:15" },
+						],
+					},
+				],
+			},
+			{
+				id: "course4",
+				title: "Python for Data Science",
+				description:
+					"Learn Python programming for data analysis, visualization, and machine learning applications.",
+				difficulty: "Intermediate",
+				image: "../images/placeholder-4.jpg",
+				sections: [
+					{
+						title: "Python Fundamentals",
+						videos: [
+							{ title: "Python Syntax", duration: "10:20" },
+							{ title: "Data Structures", duration: "12:45" },
+						],
+					},
+					{
+						title: "Data Analysis",
+						videos: [
+							{ title: "NumPy Introduction", duration: "14:30" },
+							{ title: "Pandas Library", duration: "16:20" },
+						],
+					},
+				],
+			},
+		];
+	}
+
+	return [];
+}
+
+// Function to get courses
+function getCourses() {
+	// In a real app, this would fetch from an API
+	// For now, return placeholder data
+	return getPlaceholderData("courses");
+}

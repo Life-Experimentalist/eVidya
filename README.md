@@ -1,105 +1,66 @@
-# eVidya - Interactive Tech Learning Platform
+# eVidya Learning Platform
 
-eVidya is an interactive tech learning platform with progress tracking, video lessons, quizzes, and responsive design for self-paced education in programming languages and web development.
+A client-side web application for interactive tech learning with course content, progress tracking, and video-based education.
 
-<!-- ![eVidya Platform](./img/readme/hero-image.png) -->
+## Project Overview
 
-## 🚀 Features
+eVidya is a browser-based learning platform that allows users to:
+- View and select from a variety of tech courses
+- Watch course videos embedded from YouTube
+- Take quizzes to test knowledge
+- Track learning progress locally
+- Resume courses where they left off
 
-- **Interactive Video Lessons**: Learn through engaging video content
-- **Knowledge Assessments**: Test your understanding with interactive quizzes
-- **Progress Tracking**: Monitor your advancement through each course
-- **Responsive Design**: Access courses on any device
-- **Offline Access**: Progress is saved locally for convenient access
-- **Self-Paced Learning**: Learn at your own speed and convenience
+## Key Features
 
-## 📋 Available Courses
+- **Course Library**: A collection of technology courses organized by topic
+- **Video Lessons**: Embedded YouTube videos with tracking
+- **Progress Tracking**: Client-side storage of user progress across courses
+- **Interactive Quizzes**: Knowledge assessment with feedback
+- **Responsive Design**: Works on desktop and mobile devices
 
-- JavaScript Basics
-- HTML & CSS Fundamentals
-- Introduction to Python
-- Web Frameworks Overview
+## Technical Details
 
-## 🛠️ Technologies Used
+This application is built with vanilla JavaScript, HTML, and CSS with the following technical characteristics:
 
-- HTML5, CSS3, JavaScript (ES6+)
-- Bootstrap 5
-- Font Awesome Icons
-- YouTube API
-- Local Storage for progress tracking
-- GitHub Pages for hosting
+- **No Server Required**: All data is stored in the browser's localStorage
+- **No Database**: Course data is defined in static JS files
+- **YouTube Integration**: Videos are embedded from YouTube using the iframe API
+- **Bootstrap UI**: UI components are built with Bootstrap 5
+- **Modular Design**: Code is organized into modular components
 
-## 🏗️ Project Structure
+## Project Structure
 
 ```
 eVidya/
-├── css/                    # Stylesheets
-│   ├── style.css           # Main styles
-│   ├── courses.css         # Course listing styles
-│   ├── course-details.css  # Individual course page styles
-│   └── placeholder-images.css # CSS for course thumbnails
-├── js/                     # JavaScript files
-│   ├── main.js             # Core functionality
-│   ├── course-data.js      # Course content structure
-│   ├── courses.js          # Course listing logic
-│   ├── course-navigation.js # Course navigation and content loading
-│   ├── progress-tracker.js # Progress tracking functionality
-│   └── storage.js          # LocalStorage utilities
-├── pages/                  # HTML pages
-│   ├── courses.html        # Course listing page
-│   └── functional-course.html # Course content viewer
-├── index.html              # Home page
-├── 404.html                # Custom 404 page
-├── .nojekyll               # GitHub Pages config
-└── README.md               # Project documentation
+├── css/                  # Stylesheets
+├── data/                 # Data files
+│   └── course-data.js    # Course content definitions
+├── images/               # Image assets
+├── js/                   # JavaScript modules
+│   ├── progress-tracker.js  # Progress tracking
+│   ├── course-navigation.js # Course navigation
+│   └── home.js           # Homepage functionality
+├── .github/              # GitHub related files
+├── index.html            # Homepage
+├── courses.html          # Course listing page
+├── course-details.html   # Individual course page
+└── ARCHITECTURE.md       # Technical architecture documentation
 ```
 
-## 🚀 Getting Started
+## Local Development
 
-### Prerequisites
+To work on this project locally:
 
-- Modern web browser (Chrome, Firefox, Safari, Edge)
-- No server required - runs entirely in the browser
+1. Clone the repository
+2. Open the project in your preferred editor
+3. Use a local development server to view the site
+   - You can use extensions like Live Server for VS Code
+   - Or run `npx http-server` from the project root
 
-### Running Locally
+## Recent Changes
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/Life-Experimentalist/eVidya.git
-   ```
-
-2. Open the project folder and launch `index.html` in your browser
-   - Alternatively, use a local development server
-
-### Deployment
-
-The project is configured for GitHub Pages deployment.
-
-1. Push to your GitHub repository
-2. Enable GitHub Pages in repository settings
-3. Your site will be available at `https://life-experimentalist.github.io/eVidya/`
-
-## 📝 Roadmap
-
-See the [ROADMAP.md](ROADMAP.md) file for future development plans.
-
-## ✅ TODO
-
-See the [TODO.md](TODO.md) file for planned improvements and features.
-
-## 🤝 Contributing
-
-Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 👥 Contact
-
-- Project Creator: [VKrishna04](https://github.com/VKrishna04)
-- Organization: [Life Experimentalist](https://github.com/Life-Experimentalist)
-
----
-
-Made with ❤️ by [VKrishna04](https://github.com/VKrishna04)
+- Removed automatic YouTube video duration scraping
+- Consolidated course data in the data directory
+- Created comprehensive architecture documentation
+- Simplified the client-side code for better maintainability

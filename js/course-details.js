@@ -203,6 +203,7 @@ document.addEventListener("DOMContentLoaded", function () {
 						onStateChange: function (event) {
 							// YT.PlayerState.ENDED = 0
 							if (event.data === 0) {
+								// Video has ended - mark as completed
 								trackVideoCompletion(videoIndex);
 							}
 						},
@@ -243,10 +244,10 @@ document.addEventListener("DOMContentLoaded", function () {
 					error
 				);
 				videoContainer.innerHTML += `
-          <div class="alert alert-warning">
-            Failed to load video player. Please try again later.
-          </div>
-        `;
+                <div class="alert alert-danger mt-2 p-2">
+                    <small>Error loading video player. Please refresh the page and try again.</small>
+                </div>
+            `;
 			}
 		});
 	};

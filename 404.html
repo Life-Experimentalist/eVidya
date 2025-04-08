@@ -1,116 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Page Not Found - eVidya</title>
-		<link rel="stylesheet" href="css/style.css" />
-		<style>
-			.error-container {
-				text-align: center;
-				padding: 50px 20px;
-			}
-			.home-button {
-				display: inline-block;
-				margin-top: 20px;
-				padding: 10px 20px;
-				background-color: #4285f4;
-				color: white;
-				text-decoration: none;
-				border-radius: 4px;
-			}
-		</style>
-	</head>
-	<body>
-		<div class="error-container">
-			<h1>404 - Page Not Found</h1>
-			<p>
-				Sorry, the page you are looking for doesn't exist or has been
-				moved.
-			</p>
-			<a href="index.html" class="home-button" id="home-button"
-				>Back to eVidya Home</a
-			>
-		</div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Not Found - eVidya</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/enhanced-buttons.css">
+    <style>
+        .error-container {
+            text-align: center;
+            padding: 100px 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
 
-		<script>
-			// Detect repository name for GitHub Pages
-			function getRepoName() {
-				const path = window.location.pathname;
-				const pathParts = path.split("/").filter((part) => part);
+        .error-icon {
+            font-size: 80px;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
 
-				// For GitHub Pages in the format username.github.io/repo-name/
-				if (
-					pathParts.length > 0 &&
-					window.location.hostname.includes("github.io")
-				) {
-					return pathParts[0];
-				}
+        .error-title {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: var(--text-dark);
+        }
 
-				return "";
-			}
+        .error-message {
+            font-size: 18px;
+            color: var(--text-light);
+            margin-bottom: 30px;
+        }
 
-			// Fix home button link for GitHub Pages
-			const homeButton = document.getElementById("home-button");
-			const repoName = getRepoName();
-			if (repoName) {
-				homeButton.href = `/${repoName}/index.html`;
-			}
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>eVidya Tech Courses</h1>
+            <p>Expand your knowledge with our interactive technology courses</p>
+        </div>
+    </header>
 
-			// Redirect handling for SPA-like navigation on GitHub Pages
-			function tryRedirects() {
-				const path = window.location.pathname;
-				const pathSegments = path
-					.split("/")
-					.filter((segment) => segment !== "");
+    <main class="container">
+        <div class="error-container">
+            <div class="error-icon">
+                <i class="fas fa-compass"></i>
+            </div>
+            <h1 class="error-title">Page Not Found</h1>
+            <p class="error-message">
+                The page you're looking for doesn't exist or has been moved.
+                Let's get you back on track to continue your learning journey.
+            </p>
+            <div class="action-buttons">
+                <a href="./index.html" class="btn primary-btn">
+                    <i class="fas fa-home me-2"></i>Back to Home
+                </a>
+                <a href="./pages/catalogue.html" class="btn secondary-btn">
+                    <i class="fas fa-book me-2"></i>View Courses
+                </a>
+            </div>
+        </div>
+    </main>
 
-				// Skip if we're already on a .html file
-				if (path.endsWith(".html")) return;
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 VKrishna04 eVidya Tech Courses Platform. All rights reserved.</p>
+        </div>
+    </footer>
 
-				// If this appears to be a route, try to find the corresponding HTML file
-				if (pathSegments.length > 0) {
-					const lastSegment = pathSegments[pathSegments.length - 1];
-
-					// List of possible redirects to try
-					const redirectAttempts = [
-						`${path}.html`, // Add .html to current path
-						`${path}/index.html`, // Try index.html in current path
-						`/${pathSegments.join("/")}.html`, // Try with repo name if on GitHub Pages
-					];
-
-					// If it looks like a course page, try to redirect to functional-course.html
-					if (lastSegment && !lastSegment.includes(".")) {
-						// Store the ID to pass it as a parameter
-						localStorage.setItem("selectedCourseId", lastSegment);
-
-						// Determine base path
-						let basePath = "/";
-						if (repoName) {
-							basePath = `/${repoName}/`;
-						}
-
-						// Redirect to the course page with the ID as a parameter
-						window.location.href = `${basePath}pages/functional-course.html?courseId=${lastSegment}`;
-						return;
-					}
-
-					// Try each redirect possibility
-					for (const attemptPath of redirectAttempts) {
-						fetch(attemptPath)
-							.then((response) => {
-								if (response.ok) {
-									window.location.href = attemptPath;
-									return true;
-								}
-								return false;
-							})
-							.catch(() => false); // Ignore fetch errors and try next option
-					}
-				}
-			}
-
-			// Run redirect attempts
-			tryRedirects();
-		</script>
-	</body>
+    <!-- Load main.js for path handling -->
+    <script src="./js/main.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Fix links if needed based on deployment environment
+            const links = document.querySelectorAll('a');
+            links.forEach(link => {
+                if (link.href.includes('./index.html')) {
+                    const newPath = window.getCorrectPath ? window.getCorrectPath('./index.html') : './index.html';
+                    link.href = newPath;
+                } else if (link.href.includes('./pages/catalogue.html')) {
+                    const newPath = window.getCorrectPath ? window.getCorrectPath('./pages/catalogue.html') : './pages/catalogue.html';
+                    link.href = newPath;
+                }
+            });
+        });
+    </script>
+</body>
 </html>

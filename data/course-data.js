@@ -5,30 +5,38 @@
 
 const courses = [
 	{
-		id: 1,
+		id: "func-prog",
 		title: "Functional Programming",
 		description:
 			"Learn the core concepts of functional programming and how to apply them in JavaScript",
-		image: "../images/course-functional.jpg",
+		image: "../img/courses/functional.jpg",
 		duration: "4 hours",
 		level: "Intermediate",
+		subject: "Technology",
+		subSection: "Computer Science",
 		sections: [
 			{
 				title: "Introduction to Functional Programming",
 				videos: [
 					{
-						id: "video1",
+						id: "video-func-1",
 						title: "What is Functional Programming?",
+						videoId: "e-5obm1G_FY",
 						url: "https://www.youtube.com/embed/e-5obm1G_FY",
+						description:
+							"An introduction to functional programming paradigms and concepts.",
 					},
 					{
-						id: "video2",
+						id: "video-func-2",
 						title: "Pure Functions and Side Effects",
+						videoId: "FYXpOjwYzcs",
 						url: "https://www.youtube.com/embed/FYXpOjwYzcs",
+						description:
+							"Understanding pure functions and how to avoid side effects in your code.",
 					},
 				],
 				quiz: {
-					id: "quiz1",
+					id: "quiz-func-1",
 					title: "Functional Programming Basics",
 					questions: [
 						{
@@ -69,18 +77,24 @@ const courses = [
 				title: "Functional Programming in JavaScript",
 				videos: [
 					{
-						id: "video3",
+						id: "video-func-3",
 						title: "Higher-Order Functions",
+						videoId: "BMUiFMZr7vk",
 						url: "https://www.youtube.com/embed/BMUiFMZr7vk",
+						description:
+							"Learn how to use and create functions that operate on other functions.",
 					},
 					{
-						id: "video4",
+						id: "video-func-4",
 						title: "Map, Filter, and Reduce",
+						videoId: "rRgD1yVwIvE",
 						url: "https://www.youtube.com/embed/rRgD1yVwIvE",
+						description:
+							"Master the essential array methods for functional programming in JavaScript.",
 					},
 				],
 				quiz: {
-					id: "quiz2",
+					id: "quiz-func-2",
 					title: "JavaScript Functional Programming",
 					questions: [
 						{
@@ -110,30 +124,38 @@ const courses = [
 		],
 	},
 	{
-		id: 2,
+		id: "web-dev",
 		title: "Web Development Fundamentals",
 		description:
 			"Build a strong foundation in HTML, CSS, and JavaScript with practical examples",
-		image: "../images/course-web.jpg",
+		image: "../img/courses/web-dev.jpg", // Corrected path relative to HTML
 		duration: "6 hours",
 		level: "Beginner",
+		subject: "Technology",
+		subSection: "Web Development",
 		sections: [
 			{
 				title: "HTML Basics",
 				videos: [
 					{
-						id: "video1",
+						id: "video-html-1",
 						title: "HTML Document Structure",
+						videoId: "UB1O30fR-EE",
 						url: "https://www.youtube.com/embed/UB1O30fR-EE",
+						description:
+							"Learn the foundational structure of HTML documents and semantic markup.",
 					},
 					{
-						id: "video2",
+						id: "video-html-2",
 						title: "HTML Forms and Input Elements",
+						videoId: "fNcJuPIZ2WE",
 						url: "https://www.youtube.com/embed/fNcJuPIZ2WE",
+						description:
+							"Create interactive forms and understand different input types in HTML.",
 					},
 				],
 				quiz: {
-					id: "quiz1",
+					id: "quiz-html-1",
 					title: "HTML Fundamentals Quiz",
 					questions: [
 						{
@@ -160,18 +182,24 @@ const courses = [
 				title: "CSS Styling",
 				videos: [
 					{
-						id: "video3",
+						id: "video-css-1",
 						title: "CSS Selectors and Properties",
+						videoId: "1PnVor36_40",
 						url: "https://www.youtube.com/embed/1PnVor36_40",
+						description:
+							"Master CSS selectors and learn how to apply styling to HTML elements.",
 					},
 					{
-						id: "video4",
+						id: "video-css-2",
 						title: "CSS Layout and Flexbox",
+						videoId: "JJSoEo8JSnc",
 						url: "https://www.youtube.com/embed/JJSoEo8JSnc",
+						description:
+							"Create responsive layouts using modern CSS techniques including Flexbox.",
 					},
 				],
 				quiz: {
-					id: "quiz2",
+					id: "quiz-css-1",
 					title: "CSS Knowledge Check",
 					questions: [
 						{
@@ -202,30 +230,38 @@ const courses = [
 		],
 	},
 	{
-		id: 3,
+		id: "data-structures",
 		title: "Data Structures and Algorithms",
 		description:
 			"Master the fundamental data structures and algorithms essential for efficient programming",
-		image: "../images/course-dsa.jpg",
+		image: "../img/courses/dsa.jpg", // Corrected path relative to HTML
 		duration: "8 hours",
 		level: "Advanced",
+		subject: "Technology",
+		subSection: "Computer Science",
 		sections: [
 			{
 				title: "Basic Data Structures",
 				videos: [
 					{
-						id: "video1",
+						id: "video-ds-1",
 						title: "Arrays and Linked Lists",
+						videoId: "zg9ih6SVACc",
 						url: "https://www.youtube.com/embed/zg9ih6SVACc",
+						description:
+							"Understand the differences between arrays and linked lists and when to use each.",
 					},
 					{
-						id: "video2",
+						id: "video-ds-2",
 						title: "Stacks and Queues",
+						videoId: "wjI1WNcIntg",
 						url: "https://www.youtube.com/embed/wjI1WNcIntg",
+						description:
+							"Learn about stack and queue data structures and their real-world applications.",
 					},
 				],
 				quiz: {
-					id: "quiz1",
+					id: "quiz-ds-1",
 					title: "Data Structures Fundamentals",
 					questions: [
 						{
@@ -247,18 +283,24 @@ const courses = [
 				title: "Basic Algorithms",
 				videos: [
 					{
-						id: "video3",
+						id: "video-algo-1",
 						title: "Sorting Algorithms",
+						videoId: "kPRA0W1kECg",
 						url: "https://www.youtube.com/embed/kPRA0W1kECg",
+						description:
+							"Explore different sorting algorithms and their performance characteristics.",
 					},
 					{
-						id: "video4",
+						id: "video-algo-2",
 						title: "Searching Algorithms",
+						videoId: "MFhxShGxHWc",
 						url: "https://www.youtube.com/embed/MFhxShGxHWc",
+						description:
+							"Learn efficient searching techniques for different data structures.",
 					},
 				],
 				quiz: {
-					id: "quiz2",
+					id: "quiz-algo-1",
 					title: "Algorithm Analysis",
 					questions: [
 						{
@@ -289,30 +331,38 @@ const courses = [
 		],
 	},
 	{
-		id: 4,
+		id: "react",
 		title: "React Fundamentals",
 		description:
 			"Learn how to build modern web applications with React and related technologies",
-		image: "../images/course-react.jpg",
+		image: "../img/courses/react.jpg", // Corrected path relative to HTML
 		duration: "7 hours",
 		level: "Intermediate",
+		subject: "Technology",
+		subSection: "Web Development",
 		sections: [
 			{
 				title: "React Basics",
 				videos: [
 					{
-						id: "video1",
+						id: "video-react-1",
 						title: "Introduction to React",
+						videoId: "Tn6-PIqc4UM",
 						url: "https://www.youtube.com/embed/Tn6-PIqc4UM",
+						description:
+							"Get started with React and understand its core principles.",
 					},
 					{
-						id: "video2",
+						id: "video-react-2",
 						title: "Components and Props",
+						videoId: "FdiRj-_VTVU",
 						url: "https://www.youtube.com/embed/FdiRj-_VTVU",
+						description:
+							"Learn how to create and compose React components using props.",
 					},
 				],
 				quiz: {
-					id: "quiz1",
+					id: "quiz-react-1",
 					title: "React Core Concepts",
 					questions: [
 						{
@@ -342,18 +392,24 @@ const courses = [
 				title: "React State and Hooks",
 				videos: [
 					{
-						id: "video3",
+						id: "video-react-3",
 						title: "Managing State with Hooks",
+						videoId: "O6P86uwfdR0",
 						url: "https://www.youtube.com/embed/O6P86uwfdR0",
+						description:
+							"Learn how to use React hooks to manage state in functional components.",
 					},
 					{
-						id: "video4",
+						id: "video-react-4",
 						title: "Effect Hook and Lifecycle",
+						videoId: "0ZJgIjIuY7U",
 						url: "https://www.youtube.com/embed/0ZJgIjIuY7U",
+						description:
+							"Understand how to handle side effects and component lifecycle with hooks.",
 					},
 				],
 				quiz: {
-					id: "quiz2",
+					id: "quiz-react-2",
 					title: "React Hooks Quiz",
 					questions: [
 						{
@@ -379,6 +435,49 @@ const courses = [
 						},
 					],
 				},
+			},
+		],
+	},
+	// Example Non-Tech Course
+	{
+		id: "intro-painting",
+		title: "Introduction to Acrylic Painting",
+		description:
+			"Learn the basics of acrylic painting, color mixing, and brush techniques.",
+		image: "../img/courses/painting.jpg", // Example path
+		duration: "5 hours",
+		level: "Beginner",
+		subject: "Arts",
+		subSection: "Painting",
+		sections: [
+			{
+				title: "Getting Started",
+				videos: [
+					{
+						id: "paint-1",
+						title: "Materials Overview",
+						videoId: "dQw4w9WgXcQ",
+						description:
+							"Understanding your paints, brushes, and canvases.",
+					},
+					{
+						id: "paint-2",
+						title: "Basic Color Theory",
+						videoId: "dQw4w9WgXcQ",
+						description: "Mixing primary and secondary colors.",
+					},
+				],
+			},
+			{
+				title: "Techniques",
+				videos: [
+					{
+						id: "paint-3",
+						title: "Brush Strokes",
+						videoId: "dQw4w9WgXcQ",
+						description: "Different ways to apply paint.",
+					},
+				],
 			},
 		],
 	},

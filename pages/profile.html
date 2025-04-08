@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Profile - eVidya Learning</title>
+		<!-- Bootstrap CSS -->
+		<link
+			href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+			rel="stylesheet"
+		/>
+		<!-- Font Awesome -->
+		<link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+		/>
+		<!-- Google Fonts -->
+		<link
+			href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+			rel="stylesheet"
+		/>
+		<link rel="stylesheet" href="../css/style.css" />
+		<link rel="stylesheet" href="../css/enhanced-buttons.css" />
+		<style>
+			.profile-section {
+				background: white;
+				border-radius: 12px;
+				padding: 2rem;
+				box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+				margin-bottom: 2rem;
+			}
+
+			.profile-header {
+				display: flex;
+				align-items: center;
+				margin-bottom: 2rem;
+			}
+
+			.profile-avatar {
+				width: 100px;
+				height: 100px;
+				border-radius: 50%;
+				background-color: var(--primary-color);
+				color: white;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 2.5rem;
+				margin-right: 1.5rem;
+			}
+
+			.progress-stats {
+				background: #f8f9fa;
+				border-radius: 8px;
+				padding: 1.5rem;
+				margin-bottom: 1.5rem;
+			}
+
+			.achievement {
+				display: flex;
+				align-items: center;
+				background: #fff;
+				border-radius: 8px;
+				padding: 1rem;
+				margin-bottom: 1rem;
+				box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+				transition: transform 0.2s;
+			}
+
+			.achievement:hover {
+				transform: translateY(-3px);
+			}
+
+			.achievement-icon {
+				width: 50px;
+				height: 50px;
+				border-radius: 50%;
+				background: var(--primary-color);
+				color: white;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				margin-right: 1rem;
+			}
+
+			.course-progress-list {
+				list-style: none;
+				padding: 0;
+			}
+
+			.course-progress-item {
+				padding: 1rem;
+				border-radius: 8px;
+				background: #f8f9fa;
+				margin-bottom: 1rem;
+				transition: transform 0.2s;
+			}
+
+			.course-progress-item:hover {
+				transform: translateY(-3px);
+				background: #edf2ff;
+			}
+
+			.progress {
+				height: 8px;
+				margin-top: 0.5rem;
+			}
+
+			.navbar-nav .dropdown-menu {
+				z-index: 9999 !important;
+				position: absolute !important;
+			}
+
+			/* Additional fix for dropdown positioning */
+			.dropdown {
+				position: static;
+			}
+
+			.dropdown-menu {
+				position: absolute !important;
+			}
+		</style>
+	</head>
+	<body>
+		<header>
+			<nav class="navbar navbar-expand-lg navbar-dark">
+				<div class="container">
+					<a class="navbar-brand" href="../index.html">
+						<h2>eVidya Learning</h2>
+					</a>
+					<button
+						class="navbar-toggler"
+						type="button"
+						data-bs-toggle="collapse"
+						data-bs-target="#navbarMain"
+						aria-controls="navbarMain"
+						aria-expanded="false"
+						aria-label="Toggle navigation"
+					>
+						<span class="navbar-toggler-icon"></span>
+					</button>
+					<div class="collapse navbar-collapse" id="navbarMain">
+						<ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+							<li class="nav-item">
+								<a class="nav-link" href="../index.html">
+									<i class="fas fa-home me-1"></i> Home
+								</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="./catalogue.html">
+									<i class="fas fa-book me-1"></i> Courses
+								</a>
+							</li>
+							<li class="nav-item">
+								<a
+									class="nav-link active"
+									aria-current="page"
+									href="./profile.html"
+								>
+									<i class="fas fa-user me-1"></i> Profile
+								</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="./settings.html">
+									<i class="fas fa-cog me-1"></i> Settings
+								</a>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</nav>
+		</header>
+
+		<main class="container py-5">
+			<div class="row">
+				<div class="col-lg-4">
+					<div class="profile-section">
+						<div class="profile-header">
+							<div class="profile-avatar">
+								<i class="fas fa-user"></i>
+							</div>
+							<div>
+								<h2 id="profile-name">Student</h2>
+								<p class="text-muted" id="profile-email">
+									student@example.com
+								</p>
+							</div>
+						</div>
+						<button
+							class="btn primary-btn w-100 mb-3"
+							id="edit-profile-btn"
+						>
+							<i class="fas fa-edit me-2"></i>Edit Profile
+						</button>
+						<button class="btn outline-btn w-100">
+							<i class="fas fa-share-alt me-2"></i>Share Profile
+						</button>
+					</div>
+
+					<div class="profile-section">
+						<h3><i class="fas fa-trophy me-2"></i>Achievements</h3>
+						<div id="achievements-container">
+							<div class="achievement">
+								<div class="achievement-icon">
+									<i class="fas fa-graduation-cap"></i>
+								</div>
+								<div>
+									<h5>Course Beginner</h5>
+									<p class="text-muted mb-0">
+										Completed your first course
+									</p>
+								</div>
+							</div>
+							<div class="achievement">
+								<div class="achievement-icon">
+									<i class="fas fa-award"></i>
+								</div>
+								<div>
+									<h5>Quiz Master</h5>
+									<p class="text-muted mb-0">
+										Passed 5 quizzes with perfect scores
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-lg-8">
+					<div class="profile-section">
+						<h3>
+							<i class="fas fa-chart-line me-2"></i>Learning
+							Progress
+						</h3>
+
+						<div class="progress-stats">
+							<div class="row text-center">
+								<div class="col-md-4 mb-3 mb-md-0">
+									<h4 id="courses-started">0</h4>
+									<p class="text-muted">Courses Started</p>
+								</div>
+								<div class="col-md-4 mb-3 mb-md-0">
+									<h4 id="courses-completed">0</h4>
+									<p class="text-muted">Courses Completed</p>
+								</div>
+								<div class="col-md-4">
+									<h4 id="quizzes-passed">0</h4>
+									<p class="text-muted">Quizzes Passed</p>
+								</div>
+							</div>
+						</div>
+
+						<h4>Course Progress</h4>
+						<ul
+							class="course-progress-list"
+							id="course-progress-list"
+						>
+							<!-- Course progress items will be dynamically added here -->
+							<div class="text-center py-4">
+								<div
+									class="spinner-border text-primary"
+									role="status"
+								>
+									<span class="visually-hidden"
+										>Loading...</span
+									>
+								</div>
+								<p class="mt-2">
+									Loading your course progress...
+								</p>
+							</div>
+						</ul>
+					</div>
+
+					<div class="profile-section">
+						<h3>
+							<i class="fas fa-history me-2"></i>Recent Activity
+						</h3>
+						<div id="recent-activity">
+							<div class="text-center py-4">
+								<p>No recent activity found.</p>
+								<a
+									href="./courses.html"
+									class="btn primary-btn mt-2"
+									>Browse Courses</a
+								>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</main>
+
+		<footer>
+			<div class="container">
+				<p>&copy; 2025 eVidya by VKrishna04. All rights reserved.</p>
+			</div>
+		</footer>
+
+		<!-- Bootstrap JS Bundle with Popper -->
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+		<script src="../js/main.js"></script>
+		<script src="../js/storage.js"></script>
+		<script src="../data/course-data.js"></script>
+		<script src="../js/progress-tracker.js"></script>
+		<script>
+			document.addEventListener("DOMContentLoaded", function () {
+				// Load user profile data
+				const profileName =
+					localStorage.getItem("profileName") || "Student";
+				const profileEmail =
+					localStorage.getItem("profileEmail") ||
+					"student@example.com";
+
+				document.getElementById("profile-name").textContent =
+					profileName;
+				document.getElementById("profile-email").textContent =
+					profileEmail;
+
+				// Edit profile button functionality
+				document
+					.getElementById("edit-profile-btn")
+					.addEventListener("click", function () {
+						const newName = prompt("Enter your name:", profileName);
+						const newEmail = prompt(
+							"Enter your email:",
+							profileEmail
+						);
+
+						if (newName && newName.trim() !== "") {
+							localStorage.setItem("profileName", newName);
+							document.getElementById(
+								"profile-name"
+							).textContent = newName;
+						}
+
+						if (newEmail && newEmail.trim() !== "") {
+							localStorage.setItem("profileEmail", newEmail);
+							document.getElementById(
+								"profile-email"
+							).textContent = newEmail;
+						}
+					});
+
+				// Load course progress data if available
+				if (typeof ProgressTracker !== "undefined") {
+					const progressTracker = new ProgressTracker();
+					const progressData = progressTracker.getAllProgress();
+
+					let coursesStarted = 0;
+					let coursesCompleted = 0;
+					let quizzesPassed = 0;
+
+					// Reset progress list
+					const progressList = document.getElementById(
+						"course-progress-list"
+					);
+					progressList.innerHTML = "";
+
+					// Get courses data
+					const courses = window.courseData
+						? window.courseData.courses
+						: [];
+
+					if (progressData && Object.keys(progressData).length > 0) {
+						// Count stats and create progress items
+						Object.keys(progressData).forEach((courseId) => {
+							const courseProgress = progressData[courseId];
+							const course = courses.find(
+								(c) => c.id === courseId
+							);
+
+							if (course) {
+								coursesStarted++;
+
+								// Calculate completion percentage
+								const totalItems =
+									courseProgress.totalItems || 1;
+								const completedItems =
+									courseProgress.completedItems || 0;
+								const percentComplete = Math.round(
+									(completedItems / totalItems) * 100
+								);
+
+								if (percentComplete === 100) {
+									coursesCompleted++;
+								}
+
+								// Count passed quizzes
+								if (courseProgress.quizzes) {
+									Object.values(
+										courseProgress.quizzes
+									).forEach((passed) => {
+										if (passed) quizzesPassed++;
+									});
+								}
+
+								// Create progress item
+								const li = document.createElement("li");
+								li.className = "course-progress-item";
+								li.innerHTML = `
+									<div class="d-flex justify-content-between align-items-center">
+										<h5>${course.title}</h5>
+										<span class="badge bg-${
+											percentComplete === 100
+												? "success"
+												: "primary"
+										}">${percentComplete}%</span>
+									</div>
+									<div class="progress">
+										<div class="progress-bar" role="progressbar" style="width: ${percentComplete}%"
+											aria-valuenow="${percentComplete}" aria-valuemin="0" aria-valuemax="100"></div>
+									</div>
+									<div class="mt-2">
+										<small class="text-muted">${completedItems} of ${totalItems} items completed</small>
+									</div>
+									<a href="./course-details.html?courseId=${courseId}" class="btn outline-btn btn-sm mt-2">
+										<i class="fas fa-play me-1"></i>Resume
+									</a>
+								`;
+								progressList.appendChild(li);
+							}
+						});
+
+						// Update stats
+						document.getElementById("courses-started").textContent =
+							coursesStarted;
+						document.getElementById(
+							"courses-completed"
+						).textContent = coursesCompleted;
+						document.getElementById("quizzes-passed").textContent =
+							quizzesPassed;
+
+						// If no courses started
+						if (coursesStarted === 0) {
+							progressList.innerHTML = `
+								<div class="text-center py-4">
+									<p>You haven't started any courses yet.</p>
+									<a href="./courses.html" class="btn primary-btn mt-2">Browse Courses</a>
+								</div>
+							`;
+						}
+					} else {
+						// No progress data
+						progressList.innerHTML = `
+							<div class="text-center py-4">
+								<p>You haven't started any courses yet.</p>
+								<a href="./courses.html" class="btn primary-btn mt-2">Browse Courses</a>
+							</div>
+						`;
+					}
+				}
+			});
+		</script>
+	</body>
+</html>

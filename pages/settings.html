@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Settings - eVidya Learning</title>
+		<!-- Bootstrap CSS -->
+		<link
+			href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+			rel="stylesheet"
+		/>
+		<!-- Font Awesome -->
+		<link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+		/>
+		<!-- Google Fonts -->
+		<link
+			href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+			rel="stylesheet"
+		/>
+		<link rel="stylesheet" href="../css/style.css" />
+		<link rel="stylesheet" href="../css/enhanced-buttons.css" />
+		<style>
+			.settings-section {
+				background: white;
+				border-radius: 12px;
+				padding: 2rem;
+				box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+				margin-bottom: 2rem;
+			}
+
+			.settings-header {
+				border-bottom: 1px solid #e9ecef;
+				padding-bottom: 1rem;
+				margin-bottom: 1.5rem;
+			}
+
+			.settings-group {
+				margin-bottom: 2rem;
+			}
+
+			.form-check-input:checked {
+				background-color: var(--primary-color);
+				border-color: var(--primary-color);
+			}
+
+			.form-switch .form-check-input {
+				width: 3em;
+				height: 1.5em;
+			}
+
+			.form-switch .form-check-input:focus {
+				border-color: rgba(0, 0, 0, 0.25);
+				box-shadow: none;
+			}
+
+			.form-range::-webkit-slider-thumb {
+				background: var(--primary-color);
+			}
+
+			.form-range::-moz-range-thumb {
+				background: var(--primary-color);
+			}
+
+			.form-range::-ms-thumb {
+				background: var(--primary-color);
+			}
+
+			.color-option {
+				width: 30px;
+				height: 30px;
+				border-radius: 50%;
+				display: inline-block;
+				margin-right: 10px;
+				cursor: pointer;
+				border: 3px solid #fff;
+				box-shadow: 0 0 0 1px #ddd;
+				transition: transform 0.2s, box-shadow 0.2s;
+			}
+
+			.color-option:hover {
+				transform: scale(1.1);
+			}
+
+			.color-option.active {
+				box-shadow: 0 0 0 2px var(--primary-color);
+			}
+
+			.danger-zone {
+				background-color: #fff5f5;
+				border: 1px solid #fee2e2;
+				border-radius: 8px;
+				padding: 1.5rem;
+			}
+
+			.navbar-nav .dropdown-menu {
+				z-index: 9999 !important;
+				position: absolute !important;
+			}
+
+			/* Additional fix for dropdown positioning */
+			.dropdown {
+				position: static;
+			}
+
+			.dropdown-menu {
+				position: absolute !important;
+			}
+		</style>
+	</head>
+	<body>
+		<header>
+			<nav class="navbar navbar-expand-lg navbar-dark">
+				<div class="container">
+					<a class="navbar-brand" href="../index.html">
+						<h2>eVidya Learning</h2>
+					</a>
+					<button
+						class="navbar-toggler"
+						type="button"
+						data-bs-toggle="collapse"
+						data-bs-target="#navbarMain"
+						aria-controls="navbarMain"
+						aria-expanded="false"
+						aria-label="Toggle navigation"
+					>
+						<span class="navbar-toggler-icon"></span>
+					</button>
+					<div class="collapse navbar-collapse" id="navbarMain">
+						<ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+							<li class="nav-item">
+								<a class="nav-link" href="../index.html">
+									<i class="fas fa-home me-1"></i> Home
+								</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="./catalogue.html">
+									<i class="fas fa-book me-1"></i> Courses
+								</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="./profile.html">
+									<i class="fas fa-user me-1"></i> Profile
+								</a>
+							</li>
+							<li class="nav-item">
+								<a
+									class="nav-link active"
+									aria-current="page"
+									href="./settings.html"
+								>
+									<i class="fas fa-cog me-1"></i> Settings
+								</a>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</nav>
+		</header>
+
+		<main class="container py-5">
+			<div class="row">
+				<div class="col-lg-3 mb-4">
+					<div
+						class="list-group settings-nav"
+						id="settings-tab"
+						role="tablist"
+					>
+						<a
+							class="list-group-item list-group-item-action active"
+							id="appearance-tab"
+							data-bs-toggle="list"
+							href="#appearance"
+							role="tab"
+							aria-controls="appearance"
+						>
+							<i class="fas fa-palette me-2"></i>Appearance
+						</a>
+						<a
+							class="list-group-item list-group-item-action"
+							id="learning-tab"
+							data-bs-toggle="list"
+							href="#learning"
+							role="tab"
+							aria-controls="learning"
+						>
+							<i class="fas fa-graduation-cap me-2"></i>Learning
+						</a>
+						<a
+							class="list-group-item list-group-item-action"
+							id="notifications-tab"
+							data-bs-toggle="list"
+							href="#notifications"
+							role="tab"
+							aria-controls="notifications"
+						>
+							<i class="fas fa-bell me-2"></i>Notifications
+						</a>
+						<a
+							class="list-group-item list-group-item-action"
+							id="account-tab"
+							data-bs-toggle="list"
+							href="#account"
+							role="tab"
+							aria-controls="account"
+						>
+							<i class="fas fa-user-cog me-2"></i>Account
+						</a>
+						<a
+							class="list-group-item list-group-item-action"
+							id="advanced-tab"
+							data-bs-toggle="list"
+							href="#advanced"
+							role="tab"
+							aria-controls="advanced"
+						>
+							<i class="fas fa-wrench me-2"></i>Advanced
+						</a>
+					</div>
+				</div>
+
+				<div class="col-lg-9">
+					<div class="tab-content" id="settings-tabContent">
+						<!-- Appearance Tab -->
+						<div
+							class="tab-pane fade show active"
+							id="appearance"
+							role="tabpanel"
+							aria-labelledby="appearance-tab"
+						>
+							<div class="settings-section">
+								<div class="settings-header">
+									<h4>
+										<i class="fas fa-palette me-2"></i
+										>Appearance Settings
+									</h4>
+									<p class="text-muted">
+										Customize how eVidya looks and feels
+									</p>
+								</div>
+
+								<div class="settings-group">
+									<h5>Theme Mode</h5>
+									<div class="form-check form-switch">
+										<input
+											class="form-check-input"
+											type="checkbox"
+											id="darkModeToggle"
+										/>
+										<label
+											class="form-check-label"
+											for="darkModeToggle"
+											>Dark Mode</label
+										>
+									</div>
+									<p class="text-muted small">
+										Switch between light and dark mode
+									</p>
+								</div>
+
+								<div class="settings-group">
+									<h5>Theme Color</h5>
+									<div class="d-flex align-items-center mt-3">
+										<div
+											class="color-option active"
+											style="background-color: #2196f3"
+											data-color="#2196F3"
+										></div>
+										<div
+											class="color-option"
+											style="background-color: #4caf50"
+											data-color="#4CAF50"
+										></div>
+										<div
+											class="color-option"
+											style="background-color: #ff5722"
+											data-color="#FF5722"
+										></div>
+										<div
+											class="color-option"
+											style="background-color: #9c27b0"
+											data-color="#9C27B0"
+										></div>
+										<div
+											class="color-option"
+											style="background-color: #ff9800"
+											data-color="#FF9800"
+										></div>
+									</div>
+									<p class="text-muted small mt-2">
+										Choose your preferred primary color
+									</p>
+								</div>
+
+								<div class="settings-group">
+									<h5>Font Size</h5>
+									<input
+										type="range"
+										class="form-range"
+										min="12"
+										max="20"
+										step="1"
+										id="fontSizeRange"
+										value="16"
+									/>
+									<div class="d-flex justify-content-between">
+										<span class="text-muted small"
+											>Smaller</span
+										>
+										<span
+											class="text-muted small"
+											id="fontSizeValue"
+											>16px</span
+										>
+										<span class="text-muted small"
+											>Larger</span
+										>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- Learning Tab -->
+						<div
+							class="tab-pane fade"
+							id="learning"
+							role="tabpanel"
+							aria-labelledby="learning-tab"
+						>
+							<div class="settings-section">
+								<div class="settings-header">
+									<h4>
+										<i
+											class="fas fa-graduation-cap me-2"
+										></i
+										>Learning Settings
+									</h4>
+									<p class="text-muted">
+										Customize your learning experience
+									</p>
+								</div>
+
+								<div class="settings-group">
+									<h5>Course Display</h5>
+									<div class="form-check">
+										<input
+											class="form-check-input"
+											type="radio"
+											name="courseDisplay"
+											id="gridView"
+											checked
+										/>
+										<label
+											class="form-check-label"
+											for="gridView"
+										>
+											Grid View
+										</label>
+									</div>
+									<div class="form-check">
+										<input
+											class="form-check-input"
+											type="radio"
+											name="courseDisplay"
+											id="listView"
+										/>
+										<label
+											class="form-check-label"
+											for="listView"
+										>
+											List View
+										</label>
+									</div>
+								</div>
+
+								<div class="settings-group">
+									<h5>Autoplay Videos</h5>
+									<div class="form-check form-switch">
+										<input
+											class="form-check-input"
+											type="checkbox"
+											id="autoplayToggle"
+											checked
+										/>
+										<label
+											class="form-check-label"
+											for="autoplayToggle"
+											>Enable Autoplay</label
+										>
+									</div>
+									<p class="text-muted small">
+										Automatically play videos when you open
+										a course
+									</p>
+								</div>
+
+								<div class="settings-group">
+									<h5>Quiz Settings</h5>
+									<div class="form-check form-switch">
+										<input
+											class="form-check-input"
+											type="checkbox"
+											id="showHints"
+											checked
+										/>
+										<label
+											class="form-check-label"
+											for="showHints"
+											>Show Hints</label
+										>
+									</div>
+									<div class="form-check form-switch mt-2">
+										<input
+											class="form-check-input"
+											type="checkbox"
+											id="instantFeedback"
+											checked
+										/>
+										<label
+											class="form-check-label"
+											for="instantFeedback"
+											>Instant Feedback</label
+										>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- Notifications Tab -->
+						<div
+							class="tab-pane fade"
+							id="notifications"
+							role="tabpanel"
+							aria-labelledby="notifications-tab"
+						>
+							<div class="settings-section">
+								<div class="settings-header">
+									<h4>
+										<i class="fas fa-bell me-2"></i
+										>Notification Settings
+									</h4>
+									<p class="text-muted">
+										Manage your notification preferences
+									</p>
+								</div>
+
+								<div class="settings-group">
+									<h5>Email Notifications</h5>
+									<div class="form-check form-switch">
+										<input
+											class="form-check-input"
+											type="checkbox"
+											id="emailNotifications"
+											checked
+										/>
+										<label
+											class="form-check-label"
+											for="emailNotifications"
+											>Enable Email Notifications</label
+										>
+									</div>
+								</div>
+
+								<div class="settings-group">
+									<h5>Browser Notifications</h5>
+									<div class="form-check form-switch">
+										<input
+											class="form-check-input"
+											type="checkbox"
+											id="browserNotifications"
+											checked
+										/>
+										<label
+											class="form-check-label"
+											for="browserNotifications"
+											>Enable Browser Notifications</label
+										>
+									</div>
+									<button
+										class="btn outline-btn btn-sm mt-2"
+										id="requestPermissionBtn"
+									>
+										Request Permission
+									</button>
+								</div>
+
+								<div class="settings-group">
+									<h5>Notification Types</h5>
+									<div class="form-check">
+										<input
+											class="form-check-input"
+											type="checkbox"
+											id="courseUpdateNotif"
+											checked
+										/>
+										<label
+											class="form-check-label"
+											for="courseUpdateNotif"
+										>
+											Course updates
+										</label>
+									</div>
+									<div class="form-check">
+										<input
+											class="form-check-input"
+											type="checkbox"
+											id="reminderNotif"
+											checked
+										/>
+										<label
+											class="form-check-label"
+											for="reminderNotif"
+										>
+											Learning reminders
+										</label>
+									</div>
+									<div class="form-check">
+										<input
+											class="form-check-input"
+											type="checkbox"
+											id="achievementNotif"
+											checked
+										/>
+										<label
+											class="form-check-label"
+											for="achievementNotif"
+										>
+											Achievement unlocked
+										</label>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- Account Tab -->
+						<div
+							class="tab-pane fade"
+							id="account"
+							role="tabpanel"
+							aria-labelledby="account-tab"
+						>
+							<div class="settings-section">
+								<div class="settings-header">
+									<h4>
+										<i class="fas fa-user-cog me-2"></i
+										>Account Settings
+									</h4>
+									<p class="text-muted">
+										Manage your account preferences
+									</p>
+								</div>
+
+								<div class="settings-group">
+									<h5>Account Information</h5>
+									<div class="mb-3">
+										<label
+											for="userNameInput"
+											class="form-label"
+											>Display Name</label
+										>
+										<input
+											type="text"
+											class="form-control"
+											id="userNameInput"
+											placeholder="Enter your name"
+										/>
+									</div>
+									<div class="mb-3">
+										<label
+											for="userEmailInput"
+											class="form-label"
+											>Email Address</label
+										>
+										<input
+											type="email"
+											class="form-control"
+											id="userEmailInput"
+											placeholder="Enter your email"
+										/>
+									</div>
+									<button
+										class="btn primary-btn"
+										id="saveAccountBtn"
+									>
+										<i class="fas fa-save me-2"></i>Save
+										Changes
+									</button>
+								</div>
+
+								<div class="settings-group danger-zone">
+									<h5 class="text-danger">Danger Zone</h5>
+									<p class="text-muted">
+										Irreversible actions that affect your
+										account
+									</p>
+									<button
+										class="btn btn-outline-danger"
+										id="resetProgressBtn"
+									>
+										<i class="fas fa-trash me-2"></i>Reset
+										All Progress
+									</button>
+									<p class="text-muted small mt-2">
+										This will delete all your course
+										progress and achievements
+									</p>
+								</div>
+							</div>
+						</div>
+
+						<!-- Advanced Tab -->
+						<div
+							class="tab-pane fade"
+							id="advanced"
+							role="tabpanel"
+							aria-labelledby="advanced-tab"
+						>
+							<div class="settings-section">
+								<div class="settings-header">
+									<h4>
+										<i class="fas fa-wrench me-2"></i
+										>Advanced Settings
+									</h4>
+									<p class="text-muted">
+										Configure technical aspects of the
+										platform
+									</p>
+								</div>
+
+								<div class="settings-group">
+									<h5>Data Storage</h5>
+									<div
+										class="d-flex justify-content-between align-items-center mb-2"
+									>
+										<span>Local Storage Usage</span>
+										<span
+											class="badge bg-primary"
+											id="storageUsage"
+											>Calculating...</span
+										>
+									</div>
+									<div class="progress mb-3">
+										<div
+											class="progress-bar"
+											role="progressbar"
+											style="width: 0%"
+											id="storageProgressBar"
+											aria-valuenow="0"
+											aria-valuemin="0"
+											aria-valuemax="100"
+										></div>
+									</div>
+									<button
+										class="btn outline-btn btn-sm"
+										id="clearCacheBtn"
+									>
+										<i class="fas fa-broom me-2"></i>Clear
+										Cache
+									</button>
+								</div>
+
+								<div class="settings-group">
+									<h5>Video Playback</h5>
+									<div class="mb-3">
+										<label
+											for="videoQualitySelect"
+											class="form-label"
+											>Preferred Video Quality</label
+										>
+										<select
+											class="form-select"
+											id="videoQualitySelect"
+										>
+											<option value="auto">
+												Auto (Recommended)
+											</option>
+											<option value="low">
+												Low (360p)
+											</option>
+											<option value="medium">
+												Medium (720p)
+											</option>
+											<option value="high">
+												High (1080p)
+											</option>
+										</select>
+									</div>
+								</div>
+
+								<div class="settings-group">
+									<h5>Developer Options</h5>
+									<div class="form-check form-switch">
+										<input
+											class="form-check-input"
+											type="checkbox"
+											id="developerMode"
+										/>
+										<label
+											class="form-check-label"
+											for="developerMode"
+											>Developer Mode</label
+										>
+									</div>
+									<p class="text-muted small">
+										Enable developer tools and debugging
+										options
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</main>
+
+		<footer>
+			<div class="container">
+				<p>&copy; 2025 eVidya by VKrishna04. All rights reserved.</p>
+			</div>
+		</footer>
+
+		<!-- Bootstrap JS Bundle with Popper -->
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+		<script src="../js/main.js"></script>
+		<script src="../js/storage.js"></script>
+		<script>
+			document.addEventListener("DOMContentLoaded", function () {
+				// Load saved settings
+				loadSavedSettings();
+
+				// Font size slider
+				const fontSizeRange = document.getElementById("fontSizeRange");
+				const fontSizeValue = document.getElementById("fontSizeValue");
+
+				fontSizeRange.addEventListener("input", function () {
+					const fontSize = this.value;
+					fontSizeValue.textContent = `${fontSize}px`;
+					document.documentElement.style.fontSize = `${fontSize}px`;
+					localStorage.setItem("fontSize", fontSize);
+				});
+
+				// Dark mode toggle
+				const darkModeToggle =
+					document.getElementById("darkModeToggle");
+
+				darkModeToggle.addEventListener("change", function () {
+					if (this.checked) {
+						document.body.classList.add("dark-mode");
+						localStorage.setItem("darkMode", "enabled");
+					} else {
+						document.body.classList.remove("dark-mode");
+						localStorage.setItem("darkMode", "disabled");
+					}
+				});
+
+				// Theme color options
+				const colorOptions = document.querySelectorAll(".color-option");
+
+				colorOptions.forEach((option) => {
+					option.addEventListener("click", function () {
+						// Remove active class from all options
+						colorOptions.forEach((opt) =>
+							opt.classList.remove("active")
+						);
+
+						// Add active class to clicked option
+						this.classList.add("active");
+
+						// Get selected color
+						const color = this.getAttribute("data-color");
+
+						// Apply color to root variable
+						document.documentElement.style.setProperty(
+							"--primary-color",
+							color
+						);
+
+						// Save to localStorage
+						localStorage.setItem("themeColor", color);
+					});
+				});
+
+				// Account info save
+				const userNameInput = document.getElementById("userNameInput");
+				const userEmailInput =
+					document.getElementById("userEmailInput");
+				const saveAccountBtn =
+					document.getElementById("saveAccountBtn");
+
+				// Load user data
+				userNameInput.value = localStorage.getItem("profileName") || "";
+				userEmailInput.value =
+					localStorage.getItem("profileEmail") || "";
+
+				saveAccountBtn.addEventListener("click", function () {
+					localStorage.setItem("profileName", userNameInput.value);
+					localStorage.setItem("profileEmail", userEmailInput.value);
+
+					// Show success message
+					alert("Account information saved successfully!");
+				});
+
+				// Reset progress button
+				const resetProgressBtn =
+					document.getElementById("resetProgressBtn");
+
+				resetProgressBtn.addEventListener("click", function () {
+					if (
+						confirm(
+							"Are you sure you want to reset all progress? This action cannot be undone."
+						)
+					) {
+						// Clear all progress data
+						const keysToKeep = [
+							"profileName",
+							"profileEmail",
+							"darkMode",
+							"fontSize",
+							"themeColor",
+						];
+
+						// Get all keys in localStorage
+						for (let i = 0; i < localStorage.length; i++) {
+							const key = localStorage.key(i);
+
+							// Skip keys we want to keep
+							if (!keysToKeep.includes(key)) {
+								localStorage.removeItem(key);
+							}
+						}
+
+						alert("All progress has been reset successfully!");
+					}
+				});
+
+				// Calculate storage usage
+				calculateStorageUsage();
+
+				// Clear cache button
+				const clearCacheBtn = document.getElementById("clearCacheBtn");
+
+				clearCacheBtn.addEventListener("click", function () {
+					if (
+						confirm(
+							"Are you sure you want to clear the cache? This will not affect your course progress."
+						)
+					) {
+						// Clear cache (in a real app, this would clear specific cache items)
+						alert("Cache cleared successfully!");
+						calculateStorageUsage();
+					}
+				});
+
+				// Request notification permission
+				const requestPermissionBtn = document.getElementById(
+					"requestPermissionBtn"
+				);
+
+				requestPermissionBtn.addEventListener("click", function () {
+					if ("Notification" in window) {
+						Notification.requestPermission().then(function (
+							permission
+						) {
+							if (permission === "granted") {
+								alert("Notification permission granted!");
+								document.getElementById(
+									"browserNotifications"
+								).checked = true;
+							}
+						});
+					} else {
+						alert(
+							"This browser does not support desktop notifications"
+						);
+					}
+				});
+
+				// Function to load saved settings
+				function loadSavedSettings() {
+					// Load font size
+					const savedFontSize = localStorage.getItem("fontSize");
+					if (savedFontSize) {
+						document.getElementById("fontSizeRange").value =
+							savedFontSize;
+						document.getElementById(
+							"fontSizeValue"
+						).textContent = `${savedFontSize}px`;
+						document.documentElement.style.fontSize = `${savedFontSize}px`;
+					}
+
+					// Load dark mode setting
+					const savedDarkMode = localStorage.getItem("darkMode");
+					if (savedDarkMode === "enabled") {
+						document.getElementById(
+							"darkModeToggle"
+						).checked = true;
+						document.body.classList.add("dark-mode");
+					}
+
+					// Load theme color
+					const savedThemeColor = localStorage.getItem("themeColor");
+					if (savedThemeColor) {
+						document.documentElement.style.setProperty(
+							"--primary-color",
+							savedThemeColor
+						);
+
+						// Set active class on the corresponding color option
+						const colorOption = document.querySelector(
+							`.color-option[data-color="${savedThemeColor}"]`
+						);
+						if (colorOption) {
+							document
+								.querySelectorAll(".color-option")
+								.forEach((opt) =>
+									opt.classList.remove("active")
+								);
+							colorOption.classList.add("active");
+						}
+					}
+				}
+
+				// Function to calculate storage usage
+				function calculateStorageUsage() {
+					let totalSize = 0;
+					let usagePercent = 0;
+
+					// Calculate total size of localStorage
+					for (let i = 0; i < localStorage.length; i++) {
+						const key = localStorage.key(i);
+						const value = localStorage.getItem(key);
+						totalSize += (key.length + value.length) * 2; // UTF-16 uses 2 bytes per character
+					}
+
+					// Convert to KB and limit to 2 decimal places
+					const sizeInKB = (totalSize / 1024).toFixed(2);
+
+					// Assuming 5MB (5120KB) local storage limit for most browsers
+					usagePercent = Math.min(
+						100,
+						(totalSize / (5 * 1024 * 1024)) * 100
+					);
+
+					// Update UI
+					document.getElementById(
+						"storageUsage"
+					).textContent = `${sizeInKB} KB used`;
+					document.getElementById(
+						"storageProgressBar"
+					).style.width = `${usagePercent}%`;
+					document
+						.getElementById("storageProgressBar")
+						.setAttribute("aria-valuenow", usagePercent);
+				}
+			});
+		</script>
+	</body>
+</html>

@@ -1,155 +1,188 @@
-// progress-tracker.js
+// Progress Tracker Module
+// Handles tracking user progress through courses
 
-/**
- * ProgressTracker - Manages user progress through courses
- * Tracks completed videos, quiz scores, and overall course completion
- */
-class ProgressTracker {
-	/**
-	 * Marks a video as watched for a specific course
-	 * @param {string} courseId - The course ID
-	 * @param {string} videoId - The video ID to mark as completed
-	 */
-	static markVideoComplete(courseId, videoId) {
-		const progressKey = `techCourses_progress_${courseId}`;
-		const progress = StorageManager.getData(progressKey, {
-			completedVideos: [],
-			quizScores: {},
-		});
+// Create the ProgressTracker namespace if it doesn't exist
+window.ProgressTracker = window.ProgressTracker || {};
 
-		if (!progress.completedVideos.includes(videoId)) {
-			progress.completedVideos.push(videoId);
-			StorageManager.saveData(progressKey, progress);
+(function () {
+	// Get progress data from localStorage
+	function getProgressData() {
+		try {
+			const data = localStorage.getItem("courseProgress");
+			return data ? JSON.parse(data) : {};
+		} catch (e) {
+			console.error("Error loading progress data:", e);
+			return {};
+		}
+	}
+
+	// Save progress data to localStorage
+	function saveProgressData(data) {
+		try {
+			localStorage.setItem("courseProgress", JSON.stringify(data));
+		} catch (e) {
+			console.error("Error saving progress data:", e);
+		}
+	}
+
+	// Initialize a course if it doesn't exist in the progress data
+	function initCourse(progressData, courseId) {
+		if (!progressData[courseId]) {
+			progressData[courseId] = {
+				started: new Date().toISOString(),
+				lastAccessed: new Date().toISOString(),
+				completed: [],
+				started: [],
+				totalItems: 0,
+			};
+		}
+		return progressData;
+	}
+
+	// Mark a content item as started
+	window.ProgressTracker.markContentStarted = function (courseId, contentId) {
+		let progressData = getProgressData();
+		progressData = initCourse(progressData, courseId);
+
+		progressData[courseId].lastAccessed = new Date().toISOString();
+
+		// Add to started array if not already there
+		if (!progressData[courseId].started.includes(contentId)) {
+			progressData[courseId].started.push(contentId);
 		}
 
-		this.updateCourseCompletion(courseId);
-	}
+		saveProgressData(progressData);
+	};
 
-	/**
-	 * Saves a quiz score for a specific course and quiz
-	 * @param {string} courseId - The course ID
-	 * @param {string} quizId - The quiz ID
-	 * @param {number} score - The score (percentage)
-	 */
-	static saveQuizScore(courseId, quizId, score) {
-		const progressKey = `techCourses_progress_${courseId}`;
-		const progress = StorageManager.getData(progressKey, {
-			completedVideos: [],
-			quizScores: {},
-		});
+	// Mark content as completed
+	window.ProgressTracker.markContentCompleted = function (
+		courseId,
+		contentId
+	) {
+		let progressData = getProgressData();
+		progressData = initCourse(progressData, courseId);
 
-		progress.quizScores[quizId] = score;
-		StorageManager.saveData(progressKey, progress);
+		progressData[courseId].lastAccessed = new Date().toISOString();
 
-		this.updateCourseCompletion(courseId);
-	}
+		// Add to completed array if not already there
+		if (!progressData[courseId].completed.includes(contentId)) {
+			progressData[courseId].completed.push(contentId);
+		}
 
-	/**
-	 * Get the completion status for a specific course
-	 * @param {string} courseId - The course ID
-	 * @returns {Object} Object containing completion details
-	 */
-	static getCourseProgress(courseId) {
-		const progressKey = `techCourses_progress_${courseId}`;
-		const progress = StorageManager.getData(progressKey, {
-			completedVideos: [],
-			quizScores: {},
-		});
+		saveProgressData(progressData);
+	};
 
-		const course = window.courseData.getCourseById(courseId);
-		if (!course) return { completed: false, percentage: 0 };
+	// Check if content is completed
+	window.ProgressTracker.isContentCompleted = function (courseId, contentId) {
+		const progressData = getProgressData();
+		return (
+			progressData[courseId] &&
+			progressData[courseId].completed &&
+			progressData[courseId].completed.includes(contentId)
+		);
+	};
 
-		const totalVideos = window.courseData.getTotalVideos(courseId);
-		const totalQuizzes = window.courseData.getTotalQuizzes(courseId);
-		const completedVideos = progress.completedVideos.length;
-		const completedQuizzes = Object.keys(progress.quizScores).length;
+	// Check if content is started
+	window.ProgressTracker.isContentStarted = function (courseId, contentId) {
+		const progressData = getProgressData();
+		return (
+			progressData[courseId] &&
+			progressData[courseId].started &&
+			progressData[courseId].started.includes(contentId)
+		);
+	};
 
-		const totalItems = totalVideos + totalQuizzes;
-		const completedItems = completedVideos + completedQuizzes;
+	// Get course progress percentage
+	window.ProgressTracker.getCourseProgress = function (courseId) {
+		try {
+			// Get course data to count total items
+			let totalItems = 0;
+			let course = null;
 
-		const percentage =
-			totalItems > 0
-				? Math.floor((completedItems / totalItems) * 100)
+			if (typeof getCourses === "function") {
+				course = getCourses().find((c) => c.id === courseId);
+			}
+
+			if (course && course.sections) {
+				course.sections.forEach((section) => {
+					if (section.videos) totalItems += section.videos.length;
+					if (section.quiz) totalItems += 1;
+				});
+			}
+
+			const progressData = getProgressData();
+
+			if (!progressData[courseId]) {
+				return {
+					completed: 0,
+					total: totalItems,
+					percentage: 0,
+				};
+			}
+
+			const completed = progressData[courseId].completed
+				? progressData[courseId].completed.length
 				: 0;
 
-		return {
-			completed: percentage === 100,
-			percentage,
-			completedVideos,
-			totalVideos,
-			completedQuizzes,
-			totalQuizzes,
-			quizScores: progress.quizScores,
-		};
-	}
+			const percentage =
+				totalItems > 0 ? Math.round((completed / totalItems) * 100) : 0;
 
-	/**
-	 * Check if a specific video has been completed
-	 * @param {string} courseId - The course ID
-	 * @param {string} videoId - The video ID to check
-	 * @returns {boolean} True if the video has been completed
-	 */
-	static isVideoCompleted(courseId, videoId) {
-		const progressKey = `techCourses_progress_${courseId}`;
-		const progress = StorageManager.getData(progressKey, {
-			completedVideos: [],
-			quizScores: {},
-		});
-
-		return progress.completedVideos.includes(videoId);
-	}
-
-	/**
-	 * Get the score for a specific quiz
-	 * @param {string} courseId - The course ID
-	 * @param {string} quizId - The quiz ID
-	 * @returns {number|null} The quiz score or null if not taken
-	 */
-	static getQuizScore(courseId, quizId) {
-		const progressKey = `techCourses_progress_${courseId}`;
-		const progress = StorageManager.getData(progressKey, {
-			completedVideos: [],
-			quizScores: {},
-		});
-
-		return progress.quizScores[quizId] || null;
-	}
-
-	/**
-	 * Update the overall course completion data
-	 * @param {string} courseId - The course ID
-	 */
-	static updateCourseCompletion(courseId) {
-		const progress = this.getCourseProgress(courseId);
-		const overallProgressKey = "techCourses_overallProgress";
-		const overallProgress = StorageManager.getData(overallProgressKey, {});
-
-		overallProgress[courseId] = {
-			percentage: progress.percentage,
-			completed: progress.completed,
-			lastUpdated: new Date().toISOString(),
-		};
-
-		StorageManager.saveData(overallProgressKey, overallProgress);
-	}
-
-	/**
-	 * Reset progress for a specific course
-	 * @param {string} courseId - The course ID to reset
-	 */
-	static resetCourseProgress(courseId) {
-		StorageManager.resetCourseProgress(courseId);
-
-		// Also update the overall progress
-		const overallProgressKey = "techCourses_overallProgress";
-		const overallProgress = StorageManager.getData(overallProgressKey, {});
-
-		if (overallProgress[courseId]) {
-			delete overallProgress[courseId];
-			StorageManager.saveData(overallProgressKey, overallProgress);
+			return {
+				completed: completed,
+				total: totalItems,
+				percentage: percentage,
+			};
+		} catch (e) {
+			console.error("Error calculating course progress:", e);
+			return { completed: 0, total: 0, percentage: 0 };
 		}
-	}
-}
+	};
 
-// Export the ProgressTracker for use in other files
-window.ProgressTracker = ProgressTracker;
+	// Reset course progress
+	window.ProgressTracker.resetCourseProgress = function (courseId) {
+		let progressData = getProgressData();
+
+		if (progressData[courseId]) {
+			progressData[courseId] = {
+				started: new Date().toISOString(),
+				lastAccessed: new Date().toISOString(),
+				completed: [],
+				started: [],
+			};
+
+			saveProgressData(progressData);
+		}
+	};
+
+	// Get all courses progress (for dashboard)
+	window.ProgressTracker.getAllCoursesProgress = function () {
+		const progressData = getProgressData();
+		const result = [];
+
+		for (const courseId in progressData) {
+			const courseProgress = this.getCourseProgress(courseId);
+			if (courseProgress.total > 0) {
+				result.push({
+					courseId: courseId,
+					completed: courseProgress.completed,
+					total: courseProgress.total,
+					percentage: courseProgress.percentage,
+					lastAccessed: progressData[courseId].lastAccessed,
+				});
+			}
+		}
+
+		return result;
+	};
+
+	// For backward compatibility with older API calls
+	window.ProgressTracker.markVideoComplete = function (courseId, videoId) {
+		this.markContentCompleted(courseId, videoId);
+	};
+
+	window.ProgressTracker.isVideoCompleted = function (courseId, videoId) {
+		return this.isContentCompleted(courseId, videoId);
+	};
+
+	console.log("Progress Tracker module initialized");
+})();

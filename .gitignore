@@ -68,3 +68,6 @@ yarn.lock
 *.zip
 *.rar
 *.tar.gz
+
+
+history/

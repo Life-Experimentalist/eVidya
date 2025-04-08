@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>eVidya - Course Content</title>
+		<title>Course Content - eVidya</title>
 		<!-- Bootstrap CSS -->
 		<link
 			href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
@@ -22,6 +22,7 @@
 		<link rel="stylesheet" href="../css/style.css" />
 		<link rel="stylesheet" href="../css/course-details.css" />
 		<link rel="stylesheet" href="../css/placeholder-images.css" />
+		<link rel="stylesheet" href="../css/enhanced-buttons.css" />
 		<style>
 			body {
 				font-family: "Poppins", sans-serif;
@@ -80,23 +81,92 @@
 				overflow: hidden;
 				box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
 			}
+
+			/* Progress tracking styles */
+			.progress {
+				height: 8px;
+				background-color: #e9ecef; /* Light grey color for empty progress */
+				border-radius: 4px;
+				overflow: hidden;
+			}
+
+			.navbar-nav .dropdown-menu {
+				z-index: 9999 !important;
+				position: absolute !important;
+			}
+
+			/* Additional fix for dropdown positioning */
+			.dropdown {
+				position: static;
+			}
+
+			.dropdown-menu {
+				position: absolute !important;
+			}
 		</style>
 	</head>
 	<body>
 		<header>
-			<div class="container">
+			<nav class="navbar navbar-expand-lg navbar-dark">
+				<div class="container">
+					<a class="navbar-brand" href="../index.html">
+						<h2>eVidya Learning</h2>
+					</a>
+					<button
+						class="navbar-toggler"
+						type="button"
+						data-bs-toggle="collapse"
+						data-bs-target="#navbarMain"
+						aria-controls="navbarMain"
+						aria-expanded="false"
+						aria-label="Toggle navigation"
+					>
+						<span class="navbar-toggler-icon"></span>
+					</button>
+					<div class="collapse navbar-collapse" id="navbarMain">
+						<ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+							<li class="nav-item">
+								<a class="nav-link" href="../index.html">
+									<i class="fas fa-home me-1"></i> Home
+								</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="./catalogue.html">
+									<i class="fas fa-book me-1"></i> Courses
+								</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="./profile.html">
+									<i class="fas fa-user me-1"></i> Profile
+								</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="./settings.html">
+									<i class="fas fa-cog me-1"></i> Settings
+								</a>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</nav>
+
+			<div class="container mt-4">
 				<h1 id="course-title" class="mb-2">Course Title</h1>
-				<p class="lead" id="course-description">
-					<i class="fas fa-circle-notch fa-spin me-2"></i>Loading
-					course information...
+				<p
+					class="lead"
+					id="course-description"
+					style="text-align: center"
+				>
+					<i class="fas fa-circle-notch fa-spin me-2"></i>
+					Loading course information...
 				</p>
 			</div>
 		</header>
 
 		<main class="container py-5">
 			<div class="course-navigation mb-4">
-				<a href="./courses.html" class="btn secondary-btn">
-					<i class="fas fa-arrow-left me-2"></i>Back to Courses
+				<a href="./catalogue.html" class="btn secondary-btn">
+					<i class="fas fa-arrow-left me-2"></i>Back to Catalogue
 				</a>
 				<button id="reset-progress-btn" class="btn secondary-btn ms-2">
 					<i class="fas fa-redo-alt me-2"></i>Reset Progress
@@ -133,7 +203,10 @@
 
 		<footer>
 			<div class="container">
-				<p>&copy; 2025 VKrishna04 Tech Courses. All rights reserved.</p>
+				<p>
+					&copy; 2025 VKrishna04 eVidya Tech Courses. All rights
+					reserved.
+				</p>
 			</div>
 		</footer>
 
@@ -199,8 +272,8 @@
 		<!-- App JS -->
 		<script src="../js/main.js"></script>
 		<script src="../js/storage.js"></script>
-		<script src="../js/course-data.js"></script>
+		<script src="../data/course-data.js"></script>
 		<script src="../js/progress-tracker.js"></script>
-			<script src="../js/course-navigation.js"></script>
+		<script src="../js/course-navigation.js"></script>
 	</body>
 </html>
