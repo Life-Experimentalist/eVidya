@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Settings - eVidya Learning</title>
+		<title>Settings - eVidya</title>
 		<!-- Bootstrap CSS -->
 		<link
 			href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
@@ -20,92 +20,93 @@
 			rel="stylesheet"
 		/>
 		<link rel="stylesheet" href="../css/style.css" />
-		<link rel="stylesheet" href="../css/enhanced-buttons.css" />
 		<style>
-			.settings-section {
-				background: white;
-				border-radius: 12px;
+			body {
+				font-family: "Poppins", sans-serif;
+				background-color: #f9fafb;
+			}
+
+			header {
+				background: linear-gradient(135deg, var(--primary-color), #0d47a1);
+				padding: 3rem 0;
+				margin-bottom: 0;
+			}
+
+			.settings-container {
+				max-width: 900px;
+				margin: 0 auto;
+			}
+
+			.settings-card {
+				background: #fff;
+				border-radius: 10px;
+				box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 				padding: 2rem;
-				box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
 				margin-bottom: 2rem;
 			}
 
-			.settings-header {
-				border-bottom: 1px solid #e9ecef;
-				padding-bottom: 1rem;
+			.settings-card h3 {
+				margin-bottom: 1.5rem;
+				color: var(--primary-color);
+				border-bottom: 1px solid #eee;
+				padding-bottom: 0.75rem;
+			}
+
+			.form-group {
 				margin-bottom: 1.5rem;
 			}
 
-			.settings-group {
-				margin-bottom: 2rem;
+			.form-label {
+				font-weight: 500;
+				margin-bottom: 0.5rem;
+				display: block;
 			}
 
-			.form-check-input:checked {
-				background-color: var(--primary-color);
-				border-color: var(--primary-color);
+			.form-text {
+				font-size: 0.85rem;
+				color: #6c757d;
+				margin-top: 0.25rem;
 			}
 
-			.form-switch .form-check-input {
-				width: 3em;
-				height: 1.5em;
+			.settings-footer {
+				display: flex;
+				justify-content: flex-end;
+				gap: 1rem;
+				margin-top: 1rem;
 			}
 
-			.form-switch .form-check-input:focus {
-				border-color: rgba(0, 0, 0, 0.25);
-				box-shadow: none;
-			}
-
-			.form-range::-webkit-slider-thumb {
-				background: var(--primary-color);
-			}
-
-			.form-range::-moz-range-thumb {
-				background: var(--primary-color);
-			}
-
-			.form-range::-ms-thumb {
-				background: var(--primary-color);
-			}
-
-			.color-option {
-				width: 30px;
-				height: 30px;
-				border-radius: 50%;
+			.api-status {
 				display: inline-block;
-				margin-right: 10px;
+				padding: 0.3rem 0.6rem;
+				border-radius: 50px;
+				font-size: 0.75rem;
+				font-weight: 500;
+				margin-left: 0.5rem;
+			}
+
+			.status-active {
+				background-color: #d1e7dd;
+				color: #0f5132;
+			}
+
+			.status-inactive {
+				background-color: #f8d7da;
+				color: #842029;
+			}
+
+			.input-group-text {
 				cursor: pointer;
-				border: 3px solid #fff;
-				box-shadow: 0 0 0 1px #ddd;
-				transition: transform 0.2s, box-shadow 0.2s;
+				transition: all 0.2s;
 			}
 
-			.color-option:hover {
-				transform: scale(1.1);
+			.input-group-text:hover {
+				background-color: #e9ecef;
 			}
 
-			.color-option.active {
-				box-shadow: 0 0 0 2px var(--primary-color);
-			}
-
-			.danger-zone {
-				background-color: #fff5f5;
-				border: 1px solid #fee2e2;
-				border-radius: 8px;
-				padding: 1.5rem;
-			}
-
-			.navbar-nav .dropdown-menu {
-				z-index: 9999 !important;
-				position: absolute !important;
-			}
-
-			/* Additional fix for dropdown positioning */
-			.dropdown {
-				position: static;
-			}
-
-			.dropdown-menu {
-				position: absolute !important;
+			.get-api-link {
+				display: block;
+				margin-top: 0.5rem;
+				font-size: 0.85rem;
 			}
 		</style>
 	</head>
@@ -147,7 +148,6 @@
 							<li class="nav-item">
 								<a
 									class="nav-link active"
-									aria-current="page"
 									href="./settings.html"
 								>
 									<i class="fas fa-cog me-1"></i> Settings
@@ -157,558 +157,284 @@
 					</div>
 				</div>
 			</nav>
+
+			<div class="container mt-4">
+				<h1 class="text-center text-white mb-2">User Settings</h1>
+				<p class="lead text-center text-white">
+					Manage your preferences and API keys
+				</p>
+			</div>
 		</header>
 
 		<main class="container py-5">
-			<div class="row">
-				<div class="col-lg-3 mb-4">
+			<div class="settings-container">
+				<div class="settings-card">
+					<h3>API Integration Settings</h3>
+					<p>
+						Configure API keys to enhance your learning experience
+						with additional features.
+					</p>
+
+					<!-- Gemini API Settings -->
+					<div class="form-group">
+						<label class="form-label">
+							Google Gemini API
+							<span
+								id="gemini-status"
+								class="api-status status-inactive"
+								>Inactive</span
+							>
+						</label>
+						<div class="input-group">
+							<input
+								type="password"
+								id="gemini-api-key"
+								class="form-control"
+								placeholder="Enter your Gemini API Key"
+							/>
+							<span
+								class="input-group-text"
+								id="toggle-gemini-visibility"
+							>
+								<i class="fas fa-eye-slash"></i>
+							</span>
+						</div>
+						<div class="form-text">
+							Used for AI-assisted learning features like
+							personalized explanations and answering questions.
+							<a
+								href="https://ai.google.dev/"
+								target="_blank"
+								class="get-api-link"
+								>Get your Gemini API key
+								<i class="fas fa-external-link-alt"></i></a
+							>
+						</div>
+					</div>
+
 					<div
-						class="list-group settings-nav"
-						id="settings-tab"
-						role="tablist"
-					>
-						<a
-							class="list-group-item list-group-item-action active"
-							id="appearance-tab"
-							data-bs-toggle="list"
-							href="#appearance"
-							role="tab"
-							aria-controls="appearance"
+						id="api-message"
+						class="alert alert-info d-none"
+					></div>
+
+					<div class="settings-footer">
+						<button
+							id="clear-image-cache"
+							class="btn btn-outline-secondary"
 						>
-							<i class="fas fa-palette me-2"></i>Appearance
-						</a>
-						<a
-							class="list-group-item list-group-item-action"
-							id="learning-tab"
-							data-bs-toggle="list"
-							href="#learning"
-							role="tab"
-							aria-controls="learning"
+							Clear Image Cache
+						</button>
+						<button
+							id="reset-api-key"
+							class="btn btn-outline-danger"
 						>
-							<i class="fas fa-graduation-cap me-2"></i>Learning
-						</a>
-						<a
-							class="list-group-item list-group-item-action"
-							id="notifications-tab"
-							data-bs-toggle="list"
-							href="#notifications"
-							role="tab"
-							aria-controls="notifications"
-						>
-							<i class="fas fa-bell me-2"></i>Notifications
-						</a>
-						<a
-							class="list-group-item list-group-item-action"
-							id="account-tab"
-							data-bs-toggle="list"
-							href="#account"
-							role="tab"
-							aria-controls="account"
-						>
-							<i class="fas fa-user-cog me-2"></i>Account
-						</a>
-						<a
-							class="list-group-item list-group-item-action"
-							id="advanced-tab"
-							data-bs-toggle="list"
-							href="#advanced"
-							role="tab"
-							aria-controls="advanced"
-						>
-							<i class="fas fa-wrench me-2"></i>Advanced
-						</a>
+							Reset API Key
+						</button>
+						<button id="save-api-key" class="btn btn-primary">
+							Save Changes
+						</button>
 					</div>
 				</div>
 
-				<div class="col-lg-9">
-					<div class="tab-content" id="settings-tabContent">
-						<!-- Appearance Tab -->
-						<div
-							class="tab-pane fade show active"
-							id="appearance"
-							role="tabpanel"
-							aria-labelledby="appearance-tab"
-						>
-							<div class="settings-section">
-								<div class="settings-header">
-									<h4>
-										<i class="fas fa-palette me-2"></i
-										>Appearance Settings
-									</h4>
-									<p class="text-muted">
-										Customize how eVidya looks and feels
-									</p>
-								</div>
+				<div class="settings-card">
+					<h3>Appearance Settings</h3>
 
-								<div class="settings-group">
-									<h5>Theme Mode</h5>
-									<div class="form-check form-switch">
-										<input
-											class="form-check-input"
-											type="checkbox"
-											id="darkModeToggle"
-										/>
-										<label
-											class="form-check-label"
-											for="darkModeToggle"
-											>Dark Mode</label
-										>
-									</div>
-									<p class="text-muted small">
-										Switch between light and dark mode
-									</p>
-								</div>
-
-								<div class="settings-group">
-									<h5>Theme Color</h5>
-									<div class="d-flex align-items-center mt-3">
-										<div
-											class="color-option active"
-											style="background-color: #2196f3"
-											data-color="#2196F3"
-										></div>
-										<div
-											class="color-option"
-											style="background-color: #4caf50"
-											data-color="#4CAF50"
-										></div>
-										<div
-											class="color-option"
-											style="background-color: #ff5722"
-											data-color="#FF5722"
-										></div>
-										<div
-											class="color-option"
-											style="background-color: #9c27b0"
-											data-color="#9C27B0"
-										></div>
-										<div
-											class="color-option"
-											style="background-color: #ff9800"
-											data-color="#FF9800"
-										></div>
-									</div>
-									<p class="text-muted small mt-2">
-										Choose your preferred primary color
-									</p>
-								</div>
-
-								<div class="settings-group">
-									<h5>Font Size</h5>
-									<input
-										type="range"
-										class="form-range"
-										min="12"
-										max="20"
-										step="1"
-										id="fontSizeRange"
-										value="16"
-									/>
-									<div class="d-flex justify-content-between">
-										<span class="text-muted small"
-											>Smaller</span
-										>
-										<span
-											class="text-muted small"
-											id="fontSizeValue"
-											>16px</span
-										>
-										<span class="text-muted small"
-											>Larger</span
-										>
-									</div>
-								</div>
-							</div>
+					<!-- Theme Preference -->
+					<div class="form-group">
+						<label class="form-label">Theme Preference</label>
+						<select id="theme-preference" class="form-select">
+							<option value="light">Light</option>
+							<option value="dark">Dark</option>
+							<option value="system">System Default</option>
+						</select>
+						<div class="form-text">
+							Choose your preferred theme for the application.
 						</div>
+					</div>
 
-						<!-- Learning Tab -->
-						<div
-							class="tab-pane fade"
-							id="learning"
-							role="tabpanel"
-							aria-labelledby="learning-tab"
-						>
-							<div class="settings-section">
-								<div class="settings-header">
-									<h4>
-										<i
-											class="fas fa-graduation-cap me-2"
-										></i
-										>Learning Settings
-									</h4>
-									<p class="text-muted">
-										Customize your learning experience
-									</p>
-								</div>
-
-								<div class="settings-group">
-									<h5>Course Display</h5>
-									<div class="form-check">
-										<input
-											class="form-check-input"
-											type="radio"
-											name="courseDisplay"
-											id="gridView"
-											checked
-										/>
-										<label
-											class="form-check-label"
-											for="gridView"
-										>
-											Grid View
-										</label>
-									</div>
-									<div class="form-check">
-										<input
-											class="form-check-input"
-											type="radio"
-											name="courseDisplay"
-											id="listView"
-										/>
-										<label
-											class="form-check-label"
-											for="listView"
-										>
-											List View
-										</label>
-									</div>
-								</div>
-
-								<div class="settings-group">
-									<h5>Autoplay Videos</h5>
-									<div class="form-check form-switch">
-										<input
-											class="form-check-input"
-											type="checkbox"
-											id="autoplayToggle"
-											checked
-										/>
-										<label
-											class="form-check-label"
-											for="autoplayToggle"
-											>Enable Autoplay</label
-										>
-									</div>
-									<p class="text-muted small">
-										Automatically play videos when you open
-										a course
-									</p>
-								</div>
-
-								<div class="settings-group">
-									<h5>Quiz Settings</h5>
-									<div class="form-check form-switch">
-										<input
-											class="form-check-input"
-											type="checkbox"
-											id="showHints"
-											checked
-										/>
-										<label
-											class="form-check-label"
-											for="showHints"
-											>Show Hints</label
-										>
-									</div>
-									<div class="form-check form-switch mt-2">
-										<input
-											class="form-check-input"
-											type="checkbox"
-											id="instantFeedback"
-											checked
-										/>
-										<label
-											class="form-check-label"
-											for="instantFeedback"
-											>Instant Feedback</label
-										>
-									</div>
-								</div>
-							</div>
+						<!-- Font Size -->
+					<div class="form-group">
+						<label class="form-label">Text Size</label>
+						<div class="d-flex align-items-center">
+							<input type="range" class="form-range w-75" id="text-size-slider" min="80" max="120" step="5" value="100">
+							<span class="ms-3" id="text-size-value">100%</span>
 						</div>
-
-						<!-- Notifications Tab -->
-						<div
-							class="tab-pane fade"
-							id="notifications"
-							role="tabpanel"
-							aria-labelledby="notifications-tab"
-						>
-							<div class="settings-section">
-								<div class="settings-header">
-									<h4>
-										<i class="fas fa-bell me-2"></i
-										>Notification Settings
-									</h4>
-									<p class="text-muted">
-										Manage your notification preferences
-									</p>
-								</div>
-
-								<div class="settings-group">
-									<h5>Email Notifications</h5>
-									<div class="form-check form-switch">
-										<input
-											class="form-check-input"
-											type="checkbox"
-											id="emailNotifications"
-											checked
-										/>
-										<label
-											class="form-check-label"
-											for="emailNotifications"
-											>Enable Email Notifications</label
-										>
-									</div>
-								</div>
-
-								<div class="settings-group">
-									<h5>Browser Notifications</h5>
-									<div class="form-check form-switch">
-										<input
-											class="form-check-input"
-											type="checkbox"
-											id="browserNotifications"
-											checked
-										/>
-										<label
-											class="form-check-label"
-											for="browserNotifications"
-											>Enable Browser Notifications</label
-										>
-									</div>
-									<button
-										class="btn outline-btn btn-sm mt-2"
-										id="requestPermissionBtn"
-									>
-										Request Permission
-									</button>
-								</div>
-
-								<div class="settings-group">
-									<h5>Notification Types</h5>
-									<div class="form-check">
-										<input
-											class="form-check-input"
-											type="checkbox"
-											id="courseUpdateNotif"
-											checked
-										/>
-										<label
-											class="form-check-label"
-											for="courseUpdateNotif"
-										>
-											Course updates
-										</label>
-									</div>
-									<div class="form-check">
-										<input
-											class="form-check-input"
-											type="checkbox"
-											id="reminderNotif"
-											checked
-										/>
-										<label
-											class="form-check-label"
-											for="reminderNotif"
-										>
-											Learning reminders
-										</label>
-									</div>
-									<div class="form-check">
-										<input
-											class="form-check-input"
-											type="checkbox"
-											id="achievementNotif"
-											checked
-										/>
-										<label
-											class="form-check-label"
-											for="achievementNotif"
-										>
-											Achievement unlocked
-										</label>
-									</div>
-								</div>
-							</div>
+						<div class="form-text">
+							Adjust the text size across the platform.
 						</div>
+					</div>
 
-						<!-- Account Tab -->
-						<div
-							class="tab-pane fade"
-							id="account"
-							role="tabpanel"
-							aria-labelledby="account-tab"
-						>
-							<div class="settings-section">
-								<div class="settings-header">
-									<h4>
-										<i class="fas fa-user-cog me-2"></i
-										>Account Settings
-									</h4>
-									<p class="text-muted">
-										Manage your account preferences
-									</p>
-								</div>
-
-								<div class="settings-group">
-									<h5>Account Information</h5>
-									<div class="mb-3">
-										<label
-											for="userNameInput"
-											class="form-label"
-											>Display Name</label
-										>
-										<input
-											type="text"
-											class="form-control"
-											id="userNameInput"
-											placeholder="Enter your name"
-										/>
-									</div>
-									<div class="mb-3">
-										<label
-											for="userEmailInput"
-											class="form-label"
-											>Email Address</label
-										>
-										<input
-											type="email"
-											class="form-control"
-											id="userEmailInput"
-											placeholder="Enter your email"
-										/>
-									</div>
-									<button
-										class="btn primary-btn"
-										id="saveAccountBtn"
-									>
-										<i class="fas fa-save me-2"></i>Save
-										Changes
-									</button>
-								</div>
-
-								<div class="settings-group danger-zone">
-									<h5 class="text-danger">Danger Zone</h5>
-									<p class="text-muted">
-										Irreversible actions that affect your
-										account
-									</p>
-									<button
-										class="btn btn-outline-danger"
-										id="resetProgressBtn"
-									>
-										<i class="fas fa-trash me-2"></i>Reset
-										All Progress
-									</button>
-									<p class="text-muted small mt-2">
-										This will delete all your course
-										progress and achievements
-									</p>
-								</div>
-							</div>
+					<!-- Text Spacing -->
+					<div class="form-group">
+						<label class="form-label">Reading Comfort</label>
+						<div class="form-check">
+							<input class="form-check-input" type="checkbox" id="enable-line-spacing">
+							<label class="form-check-label" for="enable-line-spacing">
+								Increased line spacing
+							</label>
 						</div>
-
-						<!-- Advanced Tab -->
-						<div
-							class="tab-pane fade"
-							id="advanced"
-							role="tabpanel"
-							aria-labelledby="advanced-tab"
-						>
-							<div class="settings-section">
-								<div class="settings-header">
-									<h4>
-										<i class="fas fa-wrench me-2"></i
-										>Advanced Settings
-									</h4>
-									<p class="text-muted">
-										Configure technical aspects of the
-										platform
-									</p>
-								</div>
-
-								<div class="settings-group">
-									<h5>Data Storage</h5>
-									<div
-										class="d-flex justify-content-between align-items-center mb-2"
-									>
-										<span>Local Storage Usage</span>
-										<span
-											class="badge bg-primary"
-											id="storageUsage"
-											>Calculating...</span
-										>
-									</div>
-									<div class="progress mb-3">
-										<div
-											class="progress-bar"
-											role="progressbar"
-											style="width: 0%"
-											id="storageProgressBar"
-											aria-valuenow="0"
-											aria-valuemin="0"
-											aria-valuemax="100"
-										></div>
-									</div>
-									<button
-										class="btn outline-btn btn-sm"
-										id="clearCacheBtn"
-									>
-										<i class="fas fa-broom me-2"></i>Clear
-										Cache
-									</button>
-								</div>
-
-								<div class="settings-group">
-									<h5>Video Playback</h5>
-									<div class="mb-3">
-										<label
-											for="videoQualitySelect"
-											class="form-label"
-											>Preferred Video Quality</label
-										>
-										<select
-											class="form-select"
-											id="videoQualitySelect"
-										>
-											<option value="auto">
-												Auto (Recommended)
-											</option>
-											<option value="low">
-												Low (360p)
-											</option>
-											<option value="medium">
-												Medium (720p)
-											</option>
-											<option value="high">
-												High (1080p)
-											</option>
-										</select>
-									</div>
-								</div>
-
-								<div class="settings-group">
-									<h5>Developer Options</h5>
-									<div class="form-check form-switch">
-										<input
-											class="form-check-input"
-											type="checkbox"
-											id="developerMode"
-										/>
-										<label
-											class="form-check-label"
-											for="developerMode"
-											>Developer Mode</label
-										>
-									</div>
-									<p class="text-muted small">
-										Enable developer tools and debugging
-										options
-									</p>
-								</div>
-							</div>
+						<div class="form-check">
+							<input class="form-check-input" type="checkbox" id="enable-dyslexia-font">
+							<label class="form-check-label" for="enable-dyslexia-font">
+								Dyslexia-friendly font
+							</label>
 						</div>
+						<div class="form-text">
+							Make reading course content more comfortable.
+						</div>
+					</div>
+
+					<div class="settings-footer">
+						<button id="save-appearance-settings" class="btn btn-primary">Save Changes</button>
+					</div>
+				</div>
+
+				<div class="settings-card">
+					<h3>Learning Preferences</h3>
+
+					<!-- Study Mode -->
+					<div class="form-group">
+						<label class="form-label">Study Mode</label>
+						<select id="study-mode" class="form-select">
+							<option value="standard">Standard</option>
+							<option value="focus">Focus Mode (Hide Distractions)</option>
+							<option value="interactive">Interactive Mode (More Activities)</option>
+						</select>
+						<div class="form-text">
+							Controls how course content is presented to you.
+						</div>
+					</div>
+
+					<!-- Learning Pace -->
+					<div class="form-group">
+						<label class="form-label">Learning Pace</label>
+						<select id="learning-pace" class="form-select">
+							<option value="self">Self-Paced (Default)</option>
+							<option value="structured">Structured Schedule</option>
+							<option value="accelerated">Accelerated Learning</option>
+						</select>
+						<div class="form-text">
+							How you prefer to progress through courses.
+						</div>
+					</div>
+
+					<!-- Content Preferences -->
+					<div class="form-group">
+						<label class="form-label">Content Preferences</label>
+						<div class="form-check form-switch">
+							<input class="form-check-input" type="checkbox" id="prefer-video" checked>
+							<label class="form-check-label" for="prefer-video">Prioritize video content</label>
+						</div>
+						<div class="form-check form-switch">
+							<input class="form-check-input" type="checkbox" id="prefer-examples" checked>
+							<label class="form-check-label" for="prefer-examples">Show more examples</label>
+						</div>
+						<div class="form-check form-switch">
+							<input class="form-check-input" type="checkbox" id="auto-play-videos">
+							<label class="form-check-label" for="auto-play-videos">Auto-play videos</label>
+						</div>
+					</div>
+
+					<div class="settings-footer">
+						<button id="save-learning-settings" class="btn btn-primary">Save Changes</button>
+					</div>
+				</div>
+<!--
+				<div class="settings-card">
+					<h3>Notification Settings</h3>
+
+					<div class="form-group">
+						<label class="form-label">Receive Notifications For</label>
+						<div class="form-check form-switch">
+							<input class="form-check-input" type="checkbox" id="notification-course-updates" checked>
+							<label class="form-check-label" for="notification-course-updates">Course updates</label>
+						</div>
+						<div class="form-check form-switch">
+							<input class="form-check-input" type="checkbox" id="notification-reminders" checked>
+							<label class="form-check-label" for="notification-reminders">Learning reminders</label>
+						</div>
+						<div class="form-check form-switch">
+							<input class="form-check-input" type="checkbox" id="notification-achievements">
+							<label class="form-check-label" for="notification-achievements">Achievement milestones</label>
+						</div>
+						<div class="form-check form-switch">
+							<input class="form-check-input" type="checkbox" id="notification-promotions">
+							<label class="form-check-label" for="notification-promotions">Promotions and news</label>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label class="form-label">Reminder Frequency</label>
+						<select id="reminder-frequency" class="form-select">
+							<option value="daily">Daily</option>
+							<option value="weekdays">Weekdays only</option>
+							<option value="weekly">Weekly</option>
+							<option value="never">Never</option>
+						</select>
+						<div class="form-text">
+							How often you'd like to receive learning reminders.
+						</div>
+					</div>
+-->
+
+					<div class="settings-footer">
+						<button id="save-notification-settings" class="btn btn-primary">Save Changes</button>
+					</div>
+				</div>
+
+				<div class="settings-card">
+					<h3>User Profile</h3>
+
+					<!-- Username -->
+					<div class="form-group">
+						<label class="form-label">Display Name</label>
+						<input type="text" id="display-name" class="form-control" placeholder="Your display name">
+						<div class="form-text">
+							This name will be shown throughout the platform.
+						</div>
+					</div>
+
+					<!-- Learning Focus -->
+					<div class="form-group">
+						<label class="form-label">Learning Interests</label>
+						<select id="learning-interests" class="form-select" multiple size="4">
+							<option value="programming">Programming</option>
+							<option value="data-science">Data Science</option>
+							<option value="design">Design</option>
+							<option value="business">Business</option>
+							<option value="marketing">Marketing</option>
+							<option value="personal-development">Personal Development</option>
+						</select>
+						<div class="form-text">
+							Hold Ctrl/Cmd to select multiple interests. This helps us recommend relevant courses.
+						</div>
+					</div>
+
+					<div class="settings-footer">
+						<button id="save-profile-settings" class="btn btn-primary">Save Changes</button>
+					</div>
+				</div>
+
+				<div class="settings-card">
+					<h3>Data Management</h3>
+
+					<div class="form-group">
+						<label class="form-label">Course Progress Data</label>
+						<div class="d-grid gap-2">
+							<button id="export-progress" class="btn btn-outline-primary">
+								<i class="fas fa-download me-2"></i>Export Progress Data
+							</button>
+							<button id="reset-all-progress" class="btn btn-outline-danger">
+								<i class="fas fa-trash me-2"></i>Reset All Course Progress
+							</button>
+						</div>
+						<div class="form-text mt-2">
+							Export saves your progress data as a JSON file. Resetting removes all progress from all courses.
+						</div>
+					</div>
+
+					<div class="settings-footer">
+						<button id="clear-all-data" class="btn btn-danger">Clear All User Data</button>
 					</div>
 				</div>
 			</div>
@@ -716,242 +442,408 @@
 
 		<footer>
 			<div class="container">
-				<p>&copy; 2025 eVidya by VKrishna04. All rights reserved.</p>
+				<p>&copy; 2025 VKrishna04 eVidya Tech Courses. All rights reserved.</p>
 			</div>
 		</footer>
 
 		<!-- Bootstrap JS Bundle with Popper -->
 		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-		<script src="../js/main.js"></script>
-		<script src="../js/storage.js"></script>
+		<!-- Load the config first -->
+		<script src="../js/config.js"></script>
 		<script>
-			document.addEventListener("DOMContentLoaded", function () {
-				// Load saved settings
-				loadSavedSettings();
+			// DOM elements
+			const geminiApiKeyInput = document.getElementById("gemini-api-key");
+			const geminiStatusEl = document.getElementById("gemini-status");
+			const saveApiKeyBtn = document.getElementById("save-api-key");
+			const resetApiKeyBtn = document.getElementById("reset-api-key");
+			const clearImageCacheBtn = document.getElementById("clear-image-cache");
+			const apiMessageEl = document.getElementById("api-message");
 
-				// Font size slider
-				const fontSizeRange = document.getElementById("fontSizeRange");
-				const fontSizeValue = document.getElementById("fontSizeValue");
+			// Appearance settings elements
+			const themePreferenceSelect = document.getElementById("theme-preference");
+			const textSizeSlider = document.getElementById("text-size-slider");
+			const textSizeValue = document.getElementById("text-size-value");
+			const enableLineSpacing = document.getElementById("enable-line-spacing");
+			const enableDyslexiaFont = document.getElementById("enable-dyslexia-font");
+			const saveAppearanceBtn = document.getElementById("save-appearance-settings");
 
-				fontSizeRange.addEventListener("input", function () {
-					const fontSize = this.value;
-					fontSizeValue.textContent = `${fontSize}px`;
-					document.documentElement.style.fontSize = `${fontSize}px`;
-					localStorage.setItem("fontSize", fontSize);
-				});
+			// Learning preferences elements
+			const studyModeSelect = document.getElementById("study-mode");
+			const learningPaceSelect = document.getElementById("learning-pace");
+			const preferVideoCheck = document.getElementById("prefer-video");
+			const preferExamplesCheck = document.getElementById("prefer-examples");
+			const autoPlayVideosCheck = document.getElementById("auto-play-videos");
+			const saveLearningBtn = document.getElementById("save-learning-settings");
 
-				// Dark mode toggle
-				const darkModeToggle =
-					document.getElementById("darkModeToggle");
+			// Notification settings elements
+			const notificationCourseUpdates = document.getElementById("notification-course-updates");
+			const notificationReminders = document.getElementById("notification-reminders");
+			const notificationAchievements = document.getElementById("notification-achievements");
+			const notificationPromotions = document.getElementById("notification-promotions");
+			const reminderFrequencySelect = document.getElementById("reminder-frequency");
+			const saveNotificationBtn = document.getElementById("save-notification-settings");
 
-				darkModeToggle.addEventListener("change", function () {
-					if (this.checked) {
-						document.body.classList.add("dark-mode");
-						localStorage.setItem("darkMode", "enabled");
-					} else {
-						document.body.classList.remove("dark-mode");
-						localStorage.setItem("darkMode", "disabled");
+			// User profile elements
+			const displayNameInput = document.getElementById("display-name");
+			const learningInterestsSelect = document.getElementById("learning-interests");
+			const saveProfileBtn = document.getElementById("save-profile-settings");
+
+			// Data management elements
+			const exportProgressBtn = document.getElementById("export-progress");
+			const resetAllProgressBtn = document.getElementById("reset-all-progress");
+			const clearAllDataBtn = document.getElementById("clear-all-data");
+
+			// Toggle password visibility
+			const toggleGeminiVisibility = document.getElementById("toggle-gemini-visibility");
+
+			// Load all settings from localStorage
+			function loadAllSettings() {
+				// Load API key
+				loadApiKey();
+
+				// Load appearance settings
+				loadAppearanceSettings();
+
+				// Load learning preferences
+				loadLearningPreferences();
+
+				// Load notification settings
+				loadNotificationSettings();
+
+				// Load user profile
+				loadUserProfile();
+
+				// Apply current appearance settings
+				applyAppearanceSettings();
+			}
+
+			// API key functions
+			function loadApiKey() {
+				const geminiApiKey = localStorage.getItem("gemini_api_key") || "";
+				geminiApiKeyInput.value = geminiApiKey;
+				updateGeminiStatus(geminiApiKey);
+			}
+
+			function updateGeminiStatus(apiKey) {
+				if (apiKey && apiKey.trim() !== "") {
+					geminiStatusEl.className = "api-status status-active";
+					geminiStatusEl.textContent = "Active";
+				} else {
+					geminiStatusEl.className = "api-status status-inactive";
+					geminiStatusEl.textContent = "Inactive";
+				}
+			}
+
+			function saveApiKey() {
+				const geminiApiKey = geminiApiKeyInput.value.trim();
+				localStorage.setItem("gemini_api_key", geminiApiKey);
+				updateGeminiStatus(geminiApiKey);
+				showMessage(apiMessageEl, "API key saved successfully!", "success");
+			}
+
+			function resetApiKey() {
+				if (confirm("Are you sure you want to reset the API key? This action cannot be undone.")) {
+					geminiApiKeyInput.value = "";
+					localStorage.removeItem("gemini_api_key");
+					updateGeminiStatus("");
+					showMessage(apiMessageEl, "API key has been reset.", "info");
+				}
+			}
+
+			// Appearance settings functions
+			function loadAppearanceSettings() {
+				// Theme preference
+				const theme = localStorage.getItem("theme_preference") || "light";
+				themePreferenceSelect.value = theme;
+
+				// Text size
+				const textSize = localStorage.getItem("text_size") || "100";
+				textSizeSlider.value = textSize;
+				textSizeValue.textContent = textSize + "%";
+
+				// Reading comfort
+				enableLineSpacing.checked = localStorage.getItem("enable_line_spacing") === "true";
+				enableDyslexiaFont.checked = localStorage.getItem("enable_dyslexia_font") === "true";
+			}
+
+			function saveAppearanceSettings() {
+				// Save theme
+				localStorage.setItem("theme_preference", themePreferenceSelect.value);
+
+				// Save text size
+				localStorage.setItem("text_size", textSizeSlider.value);
+
+				// Save reading comfort settings
+				localStorage.setItem("enable_line_spacing", enableLineSpacing.checked);
+				localStorage.setItem("enable_dyslexia_font", enableDyslexiaFont.checked);
+
+				// Apply settings immediately
+				applyAppearanceSettings();
+
+				// Show success message
+				showSettingsMessage(saveAppearanceBtn, "Appearance settings saved!");
+			}
+
+			function applyAppearanceSettings() {
+				// Apply theme
+				const theme = localStorage.getItem("theme_preference") || "light";
+				document.body.classList.remove("theme-light", "theme-dark");
+
+				if (theme === "dark") {
+					document.body.classList.add("theme-dark");
+				} else if (theme === "system") {
+					// Check system preference
+					if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+						document.body.classList.add("theme-dark");
 					}
-				});
-
-				// Theme color options
-				const colorOptions = document.querySelectorAll(".color-option");
-
-				colorOptions.forEach((option) => {
-					option.addEventListener("click", function () {
-						// Remove active class from all options
-						colorOptions.forEach((opt) =>
-							opt.classList.remove("active")
-						);
-
-						// Add active class to clicked option
-						this.classList.add("active");
-
-						// Get selected color
-						const color = this.getAttribute("data-color");
-
-						// Apply color to root variable
-						document.documentElement.style.setProperty(
-							"--primary-color",
-							color
-						);
-
-						// Save to localStorage
-						localStorage.setItem("themeColor", color);
-					});
-				});
-
-				// Account info save
-				const userNameInput = document.getElementById("userNameInput");
-				const userEmailInput =
-					document.getElementById("userEmailInput");
-				const saveAccountBtn =
-					document.getElementById("saveAccountBtn");
-
-				// Load user data
-				userNameInput.value = localStorage.getItem("profileName") || "";
-				userEmailInput.value =
-					localStorage.getItem("profileEmail") || "";
-
-				saveAccountBtn.addEventListener("click", function () {
-					localStorage.setItem("profileName", userNameInput.value);
-					localStorage.setItem("profileEmail", userEmailInput.value);
-
-					// Show success message
-					alert("Account information saved successfully!");
-				});
-
-				// Reset progress button
-				const resetProgressBtn =
-					document.getElementById("resetProgressBtn");
-
-				resetProgressBtn.addEventListener("click", function () {
-					if (
-						confirm(
-							"Are you sure you want to reset all progress? This action cannot be undone."
-						)
-					) {
-						// Clear all progress data
-						const keysToKeep = [
-							"profileName",
-							"profileEmail",
-							"darkMode",
-							"fontSize",
-							"themeColor",
-						];
-
-						// Get all keys in localStorage
-						for (let i = 0; i < localStorage.length; i++) {
-							const key = localStorage.key(i);
-
-							// Skip keys we want to keep
-							if (!keysToKeep.includes(key)) {
-								localStorage.removeItem(key);
-							}
-						}
-
-						alert("All progress has been reset successfully!");
-					}
-				});
-
-				// Calculate storage usage
-				calculateStorageUsage();
-
-				// Clear cache button
-				const clearCacheBtn = document.getElementById("clearCacheBtn");
-
-				clearCacheBtn.addEventListener("click", function () {
-					if (
-						confirm(
-							"Are you sure you want to clear the cache? This will not affect your course progress."
-						)
-					) {
-						// Clear cache (in a real app, this would clear specific cache items)
-						alert("Cache cleared successfully!");
-						calculateStorageUsage();
-					}
-				});
-
-				// Request notification permission
-				const requestPermissionBtn = document.getElementById(
-					"requestPermissionBtn"
-				);
-
-				requestPermissionBtn.addEventListener("click", function () {
-					if ("Notification" in window) {
-						Notification.requestPermission().then(function (
-							permission
-						) {
-							if (permission === "granted") {
-								alert("Notification permission granted!");
-								document.getElementById(
-									"browserNotifications"
-								).checked = true;
-							}
-						});
-					} else {
-						alert(
-							"This browser does not support desktop notifications"
-						);
-					}
-				});
-
-				// Function to load saved settings
-				function loadSavedSettings() {
-					// Load font size
-					const savedFontSize = localStorage.getItem("fontSize");
-					if (savedFontSize) {
-						document.getElementById("fontSizeRange").value =
-							savedFontSize;
-						document.getElementById(
-							"fontSizeValue"
-						).textContent = `${savedFontSize}px`;
-						document.documentElement.style.fontSize = `${savedFontSize}px`;
-					}
-
-					// Load dark mode setting
-					const savedDarkMode = localStorage.getItem("darkMode");
-					if (savedDarkMode === "enabled") {
-						document.getElementById(
-							"darkModeToggle"
-						).checked = true;
-						document.body.classList.add("dark-mode");
-					}
-
-					// Load theme color
-					const savedThemeColor = localStorage.getItem("themeColor");
-					if (savedThemeColor) {
-						document.documentElement.style.setProperty(
-							"--primary-color",
-							savedThemeColor
-						);
-
-						// Set active class on the corresponding color option
-						const colorOption = document.querySelector(
-							`.color-option[data-color="${savedThemeColor}"]`
-						);
-						if (colorOption) {
-							document
-								.querySelectorAll(".color-option")
-								.forEach((opt) =>
-									opt.classList.remove("active")
-								);
-							colorOption.classList.add("active");
-						}
-					}
+				} else {
+					document.body.classList.add("theme-light");
 				}
 
-				// Function to calculate storage usage
-				function calculateStorageUsage() {
-					let totalSize = 0;
-					let usagePercent = 0;
+				// Apply text size
+				const textSize = localStorage.getItem("text_size") || "100";
+				document.documentElement.style.fontSize = `${textSize}%`;
 
-					// Calculate total size of localStorage
-					for (let i = 0; i < localStorage.length; i++) {
-						const key = localStorage.key(i);
-						const value = localStorage.getItem(key);
-						totalSize += (key.length + value.length) * 2; // UTF-16 uses 2 bytes per character
+				// Apply reading comfort settings
+				if (localStorage.getItem("enable_line_spacing") === "true") {
+					document.body.classList.add("increased-line-spacing");
+				} else {
+					document.body.classList.remove("increased-line-spacing");
+				}
+
+				if (localStorage.getItem("enable_dyslexia_font") === "true") {
+					document.documentElement.style.fontFamily = "'OpenDyslexic', sans-serif";
+				} else {
+					document.documentElement.style.fontFamily = "'Poppins', sans-serif";
+				}
+			}
+
+			// Learning preferences functions
+			function loadLearningPreferences() {
+				studyModeSelect.value = localStorage.getItem("study_mode") || "standard";
+				learningPaceSelect.value = localStorage.getItem("learning_pace") || "self";
+				preferVideoCheck.checked = localStorage.getItem("prefer_video") !== "false";
+				preferExamplesCheck.checked = localStorage.getItem("prefer_examples") !== "false";
+				autoPlayVideosCheck.checked = localStorage.getItem("auto_play_videos") === "true";
+			}
+
+			function saveLearningPreferences() {
+				localStorage.setItem("study_mode", studyModeSelect.value);
+				localStorage.setItem("learning_pace", learningPaceSelect.value);
+				localStorage.setItem("prefer_video", preferVideoCheck.checked);
+				localStorage.setItem("prefer_examples", preferExamplesCheck.checked);
+				localStorage.setItem("auto_play_videos", autoPlayVideosCheck.checked);
+
+				showSettingsMessage(saveLearningBtn, "Learning preferences saved!");
+			}
+
+			// Notification settings functions
+			function loadNotificationSettings() {
+				notificationCourseUpdates.checked = localStorage.getItem("notification_course_updates") !== "false";
+				notificationReminders.checked = localStorage.getItem("notification_reminders") !== "false";
+				notificationAchievements.checked = localStorage.getItem("notification_achievements") === "true";
+				notificationPromotions.checked = localStorage.getItem("notification_promotions") === "true";
+				reminderFrequencySelect.value = localStorage.getItem("reminder_frequency") || "daily";
+			}
+
+			function saveNotificationSettings() {
+				localStorage.setItem("notification_course_updates", notificationCourseUpdates.checked);
+				localStorage.setItem("notification_reminders", notificationReminders.checked);
+				localStorage.setItem("notification_achievements", notificationAchievements.checked);
+				localStorage.setItem("notification_promotions", notificationPromotions.checked);
+				localStorage.setItem("reminder_frequency", reminderFrequencySelect.value);
+
+				showSettingsMessage(saveNotificationBtn, "Notification settings saved!");
+			}
+
+			// User profile functions
+			function loadUserProfile() {
+				// Load display name
+				displayNameInput.value = localStorage.getItem("display_name") || "";
+
+				// Load learning interests
+				const interests = localStorage.getItem("learning_interests");
+				if (interests) {
+					const interestsArray = JSON.parse(interests);
+
+					// Select all options that match the interests
+					Array.from(learningInterestsSelect.options).forEach(option => {
+						option.selected = interestsArray.includes(option.value);
+					});
+				}
+			}
+
+			function saveUserProfile() {
+				// Save display name
+				localStorage.setItem("display_name", displayNameInput.value);
+
+				// Save learning interests
+				const selectedInterests = Array.from(learningInterestsSelect.selectedOptions).map(option => option.value);
+				localStorage.setItem("learning_interests", JSON.stringify(selectedInterests));
+
+				showSettingsMessage(saveProfileBtn, "Profile saved successfully!");
+
+				// Update display name across the site
+				updateDisplayName();
+			}
+
+			function updateDisplayName() {
+				const name = localStorage.getItem("display_name");
+				if (name) {
+					// This would update any elements showing the user's name
+					// For example, if there's a user-name element in the header
+					const userNameElements = document.querySelectorAll(".user-name");
+					userNameElements.forEach(el => {
+						el.textContent = name;
+					});
+				}
+			}
+
+			// Data management functions
+			function exportProgressData() {
+				const progressData = {
+					courseProgress: JSON.parse(localStorage.getItem("courseProgress") || "{}"),
+					completedLessons: JSON.parse(localStorage.getItem("completedLessons") || "{}"),
+					completedQuizzes: JSON.parse(localStorage.getItem("completedQuizzes") || "{}"),
+					watchedVideos: JSON.parse(localStorage.getItem("watchedVideos") || "{}"),
+					timestamp: new Date().toISOString()
+				};
+
+				// Create a blob and download link
+				const dataStr = JSON.stringify(progressData, null, 2);
+				const dataBlob = new Blob([dataStr], { type: "application/json" });
+				const url = URL.createObjectURL(dataBlob);
+
+				// Create and trigger download
+				const a = document.createElement("a");
+				a.href = url;
+				a.download = `eVidya_progress_${new Date().toLocaleDateString().replace(/\//g, "-")}.json`;
+				document.body.appendChild(a);
+				a.click();
+				document.body.removeChild(a);
+				URL.revokeObjectURL(url);
+
+				showMessage(apiMessageEl, "Progress data exported successfully!", "success");
+			}
+
+			function resetAllProgress() {
+				if (confirm("Are you sure you want to reset ALL course progress? This cannot be undone.")) {
+					localStorage.removeItem("courseProgress");
+					localStorage.removeItem("completedLessons");
+					localStorage.removeItem("completedQuizzes");
+					localStorage.removeItem("watchedVideos");
+
+					showMessage(apiMessageEl, "All course progress has been reset.", "warning");
+				}
+			}
+
+			function clearAllUserData() {
+				if (confirm("⚠️ WARNING: This will delete ALL your user data including progress, settings, and preferences. This action CANNOT be undone. Are you absolutely sure?")) {
+					// Get current API key before clearing (optional, in case we want to preserve it)
+					const apiKey = localStorage.getItem("gemini_api_key");
+
+					// Clear all localStorage
+					localStorage.clear();
+
+					// Optionally restore API key if needed
+					if (apiKey && confirm("Would you like to keep your Gemini API key?")) {
+						localStorage.setItem("gemini_api_key", apiKey);
 					}
 
-					// Convert to KB and limit to 2 decimal places
-					const sizeInKB = (totalSize / 1024).toFixed(2);
+					showMessage(apiMessageEl, "All user data has been cleared. The page will reload.", "warning");
 
-					// Assuming 5MB (5120KB) local storage limit for most browsers
-					usagePercent = Math.min(
-						100,
-						(totalSize / (5 * 1024 * 1024)) * 100
-					);
+					// Reload page after a short delay
+					setTimeout(() => {
+						window.location.reload();
+					}, 2000);
+				}
+			}
 
-					// Update UI
-					document.getElementById(
-						"storageUsage"
-					).textContent = `${sizeInKB} KB used`;
-					document.getElementById(
-						"storageProgressBar"
-					).style.width = `${usagePercent}%`;
-					document
-						.getElementById("storageProgressBar")
-						.setAttribute("aria-valuenow", usagePercent);
+			// Utility functions
+			function togglePasswordVisibility(inputEl, toggleEl) {
+				const type = inputEl.getAttribute("type") === "password" ? "text" : "password";
+				inputEl.setAttribute("type", type);
+
+				// Toggle icon
+				const iconEl = toggleEl.querySelector("i");
+				if (type === "text") {
+					iconEl.className = "fas fa-eye";
+				} else {
+					iconEl.className = "fas fa-eye-slash";
+				}
+			}
+
+			function showMessage(element, message, type) {
+				element.textContent = message;
+				element.className = `alert alert-${type}`;
+				element.classList.remove("d-none");
+
+				// Hide after 5 seconds
+				setTimeout(() => {
+					element.classList.add("d-none");
+				}, 5000);
+			}
+
+			function showSettingsMessage(buttonElement, message) {
+				// Create a temporary success message
+				const messageEl = document.createElement("div");
+				messageEl.className = "alert alert-success mt-3";
+				messageEl.textContent = message;
+
+				// Insert after the button's parent (settings-footer)
+				const parentEl = buttonElement.closest(".settings-footer");
+				parentEl.parentNode.insertBefore(messageEl, parentEl.nextSibling);
+
+				// Remove after 3 seconds
+				setTimeout(() => {
+					messageEl.remove();
+				}, 3000);
+			}
+
+			// Text size slider update
+			textSizeSlider.addEventListener("input", function() {
+				textSizeValue.textContent = this.value + "%";
+				document.documentElement.style.fontSize = `${this.value}%`;
+			});
+
+			// Event listeners
+			document.addEventListener("DOMContentLoaded", function() {
+				// Load all settings
+				loadAllSettings();
+
+				// API key
+				saveApiKeyBtn.addEventListener("click", saveApiKey);
+				resetApiKeyBtn.addEventListener("click", resetApiKey);
+				toggleGeminiVisibility.addEventListener("click", () => togglePasswordVisibility(geminiApiKeyInput, toggleGeminiVisibility));
+
+				// Clear image cache
+				clearImageCacheBtn.addEventListener("click", function() {
+					if (confirm("Are you sure you want to clear the image cache? This will reset all course thumbnail images.")) {
+						const clearedCount = config.images.clearImageCache();
+						showMessage(apiMessageEl, `Image cache cleared successfully (${clearedCount} images). Refresh pages to see new images.`, "info");
+					}
+				});
+
+				// Appearance settings
+				saveAppearanceBtn.addEventListener("click", saveAppearanceSettings);
+
+				// Learning preferences
+				saveLearningBtn.addEventListener("click", saveLearningPreferences);
+
+				// Notification settings
+				saveNotificationBtn.addEventListener("click", saveNotificationSettings);
+
+				// User profile
+				saveProfileBtn.addEventListener("click", saveUserProfile);
+
+				// Data management
+				exportProgressBtn.addEventListener("click", exportProgressData);
+				resetAllProgressBtn.addEventListener("click", resetAllProgress);
+				clearAllDataBtn.addEventListener("click", clearAllUserData);
+
+				// Check for system dark mode changes
+				if (window.matchMedia) {
+					window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyAppearanceSettings);
 				}
 			});
 		</script>

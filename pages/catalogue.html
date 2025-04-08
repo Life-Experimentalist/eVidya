@@ -283,32 +283,6 @@
 				noCoursesMessage.style.display = "none";
 			}
 
-			// Function to fetch Unsplash image
-			async function fetchUnsplashImage(keyword, courseId) {
-				// If no API key is available, use Picsum immediately
-				if (!unsplashAccessKey || unsplashAccessKey === 'YOUR_DEVELOPMENT_KEY') {
-					return `https://picsum.photos/800/450?random=${courseId}`;
-				}
-
-				try {
-					const unsplashApiUrl = `https://api.unsplash.com/photos/random?query=${encodeURIComponent(keyword)}&client_id=${unsplashAccessKey}`;
-					const response = await fetch(unsplashApiUrl);
-
-					if (!response.ok) {
-						throw new Error(`Unsplash API error: ${response.status}`);
-					}
-
-					const data = await response.json();
-					// Add attribution for Unsplash (required by their API terms)
-					console.log(`Photo by ${data.user.name} on Unsplash`);
-					return data.urls.regular;
-				} catch (error) {
-					console.error('Error fetching from Unsplash:', error);
-					// Fallback to Picsum
-					return `https://picsum.photos/800/450?random=${courseId}`;
-				}
-			}
-
 			// Function to create a course card
 			function createCourseCard(course, showProgress = false) {
 				const card = document.createElement("div");
@@ -317,131 +291,32 @@
 				const progress = courseProgress[course.id] || 0;
 
 				// Set up the progress bar HTML if needed
-				const progressHTML = showProgress
-					? `<div class="progress-bar-container">
-                    <div class="progress-bar" style="width: ${progress}%"></div>
-                </div>
-                <div class="progress-text">${progress}% Complete</div>`
-					: "";
+				const progressHTML = showProgress ?
+					`<div class="progress-bar-container">
+						<div class="progress-bar" style="width: ${progress}%"></div>
+					</div>
+					<div class="progress-text">${progress}% Complete</div>` : '';
 
-				// Use more relevant images based on course content
-				let imagePath = course.image;
-				if (
-					!imagePath ||
-					imagePath === "" ||
-					imagePath.includes("undefined")
-				) {
-					// Extract keywords from course title or subject for more relevant images
-					let keyword = "";
-
-					// First try to use the subject as keyword
-					if (course.subject) {
-						keyword = course.subject.toLowerCase();
-					}
-
-					// If subject is too generic or missing, use keywords from title
-					if (
-						!keyword ||
-						keyword === "general" ||
-						keyword === "other"
-					) {
-						// Extract most meaningful word from title
-						const words = course.title.split(" ");
-						const skipWords = [
-							"the",
-							"a",
-							"an",
-							"and",
-							"or",
-							"but",
-							"in",
-							"on",
-							"at",
-							"to",
-							"for",
-							"with",
-							"introduction",
-							"basic",
-							"advanced",
-							"course",
-						];
-
-						for (const word of words) {
-							if (
-								word.length > 3 &&
-								!skipWords.includes(word.toLowerCase())
-							) {
-								keyword = word.toLowerCase();
-								break;
-							}
-						}
-
-						// If no good keyword found, default to the subject
-						if (!keyword) {
-							keyword = course.subject.toLowerCase();
-						}
-					}
-
-					// Fallback if we still don't have a good keyword
-					if (!keyword) {
-						keyword = "education";
-					}
-
-					// Use dedicated function to fetch Unsplash image
-					fetchUnsplashImage(keyword, course.id)
-						.then((url) => {
-							const imgElement =
-								card.querySelector(".course-image img");
-							if (imgElement) {
-								imgElement.src = url;
-							}
-						})
-						.catch((error) => {
-							console.error(
-								"Error fetching Unsplash image:",
-								error
-							);
-							// Fallback to Picsum if Unsplash fails
-							const imgElement =
-								card.querySelector(".course-image img");
-							if (imgElement) {
-								imgElement.src = `https://picsum.photos/800/450?random=${course.id}`;
-							}
-						});
-
-					// Set a loading placeholder initially
-					imagePath = "../assets/images/loading-placeholder.jpg";
-				}
+				// Get image URL using the config method instead of fetching from Unsplash
+				const imagePath = config.images.getCourseImageUrl(course);
 
 				// Create card HTML
 				card.innerHTML = `
-                <div class="course-image">
-                    <img src="${imagePath}" alt="${
-					course.title
-				}" onerror="this.src='https://picsum.photos/800/450?random=${
-					course.id
-				}'; this.onerror=null;">
-                    <div class="difficulty-badge ${course.level.toLowerCase()}">${
-					course.level
-				}</div>
-                </div>
-                <div class="course-content">
-                    <h3>${course.title}</h3>
-                    <p>${course.description}</p>
-                    <div class="course-meta">
-                        <span><i class="material-icons">schedule</i> ${
-							course.duration
-						}</span>
-                        <span><i class="material-icons">category</i> ${
-							course.subject
-						}</span>
-                    </div>
-                    ${progressHTML}
-                    <a href="course-details.html?id=${
-						course.id
-					}" class="btn primary-btn btn-block">View Course</a>
-                </div>
-            `;
+					<div class="course-image">
+						<img src="${imagePath}" alt="${course.title}" onerror="this.src='https://picsum.photos/800/450?random=${course.id}'; this.onerror=null;">
+						<div class="difficulty-badge ${course.level.toLowerCase()}">${course.level}</div>
+					</div>
+					<div class="course-content">
+						<h3>${course.title}</h3>
+						<p>${course.description}</p>
+						<div class="course-meta">
+							<span><i class="material-icons">schedule</i> ${course.duration}</span>
+							<span><i class="material-icons">category</i> ${course.subject}</span>
+						</div>
+						${progressHTML}
+						<a href="course-details.html?courseId=${course.id}" class="btn primary-btn btn-block">View Course</a>
+					</div>
+				`;
 
 				return card;
 			}

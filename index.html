@@ -442,8 +442,8 @@
 				}
 
 				// Display number of available courses if data is available
-				if (window.courseData && window.courseData.courses) {
-					const courseCount = window.courseData.courses.length;
+				if (window.courses && window.courses.courses) {
+					const courseCount = window.courses.courses.length;
 
 					// Update course count in the stats section
 					const courseCountElement = document.getElementById("course-count");
@@ -458,7 +458,7 @@
 						let totalQuizzes = 0;
 
 						// Count total videos and quizzes
-						window.courseData.courses.forEach(course => {
+						window.courses.courses.forEach(course => {
 							course.sections.forEach(section => {
 								if (section.videos) totalVideos += section.videos.length;
 								if (section.quiz) totalQuizzes++;
