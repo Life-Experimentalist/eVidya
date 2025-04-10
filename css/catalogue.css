@@ -111,6 +111,7 @@
 	/* Limit title lines */
 	display: -webkit-box;
 	-webkit-line-clamp: 2;
+	line-clamp: 2;
 	-webkit-box-orient: vertical;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -131,6 +132,7 @@
 	/* Limit description lines */
 	display: -webkit-box;
 	-webkit-line-clamp: 3;
+	line-clamp: 3;
 		/* Limit to 3 lines */
 		-webkit-box-orient: vertical;
 			overflow: hidden;
@@ -170,11 +172,84 @@
 		/* Use btn-sm for smaller button */
 }
 
-/* --- List View Specific Styles --- */
-.courses-list-view {
-	/* Container class when in list view */
-	/* No specific styles needed here if wrappers handle spacing */
+/* --- Horizontal Scroll for Continue Learning Section --- */
+.position-relative {
+	position: relative;
 }
+
+.horizontal-scroll-wrapper {
+	overflow: hidden;
+	position: relative;
+	width: 100%;
+	padding: 10px 0;
+}
+
+.horizontal-scroll {
+	display: flex;
+	flex-wrap: nowrap;
+	overflow-x: auto;
+	scroll-behavior: smooth;
+	-webkit-overflow-scrolling: touch;
+	scrollbar-width: none;
+	/* Firefox */
+	-ms-overflow-style: none;
+	/* IE and Edge */
+	gap: 20px;
+	padding: 5px 2px;
+}
+
+.horizontal-scroll::-webkit-scrollbar {
+	display: none;
+	/* Chrome, Safari, Opera */
+}
+
+.horizontal-scroll .course-card-wrapper {
+	flex: 0 0 300px;
+	/* Fixed width for cards in horizontal scroll */
+	max-width: 300px;
+	margin-bottom: 0;
+}
+
+/* Scroll buttons */
+.scroll-buttons {
+	position: absolute;
+	width: 100%;
+	height: 0;
+	top: 50%;
+	z-index: 10;
+}
+
+.scroll-btn {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: rgba(255, 255, 255, 0.9);
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+	border: none;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	z-index: 2;
+}
+
+.scroll-btn:hover {
+	background-color: rgba(255, 255, 255, 1);
+	box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+.scroll-btn.left {
+	left: -10px;
+}
+
+.scroll-btn.right {
+	right: -10px;
+}
+/* --- List View Specific Styles --- */
 
 .courses-list-view .course-card-wrapper {
 	margin-bottom: 1rem;
@@ -234,10 +309,12 @@
 	min-height: auto;
 	/* Remove min-height */
 	-webkit-line-clamp: 2;
+	line-clamp: 2;
 }
 
 .courses-list-view .course-description {
 	-webkit-line-clamp: 4;
+	line-clamp: 4;
 	/* Allow more lines in list view */
 	flex-grow: 0;
 	/* Don't let description push button too far */

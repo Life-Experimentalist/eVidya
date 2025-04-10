@@ -206,12 +206,19 @@
                 <div id="no-progress-message" class="alert alert-light text-center">
                     You haven't started any courses yet. Explore the catalogue below!
                 </div>
-				<div id="currently-learning-container" class="row g-4">
-					<!-- Courses in progress inserted here -->
-				</div>
+                <div class="position-relative">
+                    <div class="scroll-buttons">
+                        <button id="scroll-left" class="btn btn-light rounded-circle scroll-btn left"><i class="fas fa-chevron-left"></i></button>
+                        <button id="scroll-right" class="btn btn-light rounded-circle scroll-btn right"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <div class="horizontal-scroll-wrapper">
+                        <div id="currently-learning-container" class="d-flex flex-nowrap horizontal-scroll">
+                            <!-- Courses in progress inserted here -->
+                        </div>
+                    </div>
+                </div>
                 <hr class="my-4"> <!-- Separator before all courses -->
 			</div>
-
 
 			<!-- All Courses Section -->
 			<div class="row">

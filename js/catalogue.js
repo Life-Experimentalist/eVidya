@@ -24,6 +24,8 @@ document.addEventListener("DOMContentLoaded", function () {
 		"currently-learning-container"
 	);
 	const noProgressMessage = document.getElementById("no-progress-message");
+	const scrollLeftBtn = document.getElementById("scroll-left");
+	const scrollRightBtn = document.getElementById("scroll-right");
 
 	// --- State Variables ---
 	let currentViewMode = "grid"; // Default view: 'grid' or 'list' - will be overwritten by localStorage if available
@@ -100,6 +102,30 @@ document.addEventListener("DOMContentLoaded", function () {
 		listViewBtn?.addEventListener("click", () =>
 			setViewModeAndRender("list")
 		);
+
+		// Add event listeners for scroll buttons
+		if (scrollLeftBtn) {
+			scrollLeftBtn.addEventListener("click", () => {
+				scrollHorizontally(-300); // Scroll left by 300px
+			});
+		}
+
+		if (scrollRightBtn) {
+			scrollRightBtn.addEventListener("click", () => {
+				scrollHorizontally(300); // Scroll right by 300px
+			});
+		}
+	}
+
+	// Function to scroll the horizontal container
+	function scrollHorizontally(amount) {
+		const scrollContainer = document.querySelector(".horizontal-scroll");
+		if (scrollContainer) {
+			scrollContainer.scrollBy({
+				left: amount,
+				behavior: "smooth",
+			});
+		}
 	}
 
 	function handleSearch() {
@@ -328,7 +354,6 @@ document.addEventListener("DOMContentLoaded", function () {
 	}
 
 	function renderCurrentlyLearning() {
-		// Logic remains the same
 		if (
 			!currentlyLearningContainer ||
 			!currentlyLearningSection ||
@@ -336,13 +361,32 @@ document.addEventListener("DOMContentLoaded", function () {
 		)
 			return;
 
+		// Get user progress data from localStorage for all courses
+		let userProgressData = {};
+		allCoursesData.forEach((course) => {
+			const progressKey = `progress_${course.id}`;
+			const courseProgress = JSON.parse(
+				localStorage.getItem(progressKey)
+			);
+			if (courseProgress && courseProgress.overallProgress > 0) {
+				userProgressData[course.id] = {
+					progress: courseProgress.overallProgress,
+					totalWatchTime: courseProgress.totalWatchTime || 0,
+				};
+			}
+		});
+
 		const inProgressCourses = allCoursesData.filter(
 			(course) =>
-				courseProgress[course.id] && courseProgress[course.id] > 0
+				userProgressData[course.id] &&
+				userProgressData[course.id].progress > 0
 		);
 
+		// Sort by progress percentage (highest first)
 		inProgressCourses.sort(
-			(a, b) => (courseProgress[b.id] || 0) - (courseProgress[a.id] || 0)
+			(a, b) =>
+				(userProgressData[b.id]?.progress || 0) -
+				(userProgressData[a.id]?.progress || 0)
 		);
 
 		currentlyLearningContainer.innerHTML = "";
@@ -353,18 +397,41 @@ document.addEventListener("DOMContentLoaded", function () {
 			currentlyLearningSection.style.display = "block";
 			hideNoResults(noProgressMessage);
 
+			// Toggle visibility of scroll buttons based on course count
+			const scrollButtons = document.querySelector(".scroll-buttons");
+			if (scrollButtons) {
+				if (inProgressCourses.length <= 3) {
+					scrollButtons.style.display = "none";
+				} else {
+					scrollButtons.style.display = "block";
+				}
+			}
+
 			inProgressCourses.forEach((course) => {
-				const card = createCourseCard(course, true);
-				const col = document.createElement("div");
-				col.className = "col-lg-4 col-md-6 mb-4";
-				col.appendChild(card);
-				currentlyLearningContainer.appendChild(col);
+				const courseProgress = userProgressData[course.id];
+				const card = createCourseCard(course, true, courseProgress);
+
+				const wrapper = document.createElement("div");
+				wrapper.className = "course-card-wrapper";
+				wrapper.appendChild(card);
+
+				currentlyLearningContainer.appendChild(wrapper);
 			});
 		}
 	}
 
-	function createCourseCard(course, showProgress = false) {
-		// Logic remains the same
+	function createCourseCard(
+		course,
+		showProgress = false,
+		progressData = null
+	) {
+		// Get course progress data
+		const progress = progressData?.progress || 0;
+		const watchTimeSeconds = progressData?.totalWatchTime || 0;
+
+		// Format watch time
+		const formattedWatchTime = formatWatchTime(watchTimeSeconds);
+
 		const card = document.createElement("div");
 		card.className = "course-card";
 
@@ -376,14 +443,20 @@ document.addEventListener("DOMContentLoaded", function () {
 		}
 		const fallbackImage = `https://picsum.photos/seed/${course.id}/400/225`;
 
-		const progress = courseProgress[course.id] || 0;
 		const progressHTML =
 			showProgress && progress > 0
 				? `
-            <div class="progress-bar-container mb-2 mt-auto">
-                <div class="progress-bar" style="width: ${progress}%" title="${progress}% Complete"></div>
-            </div>
-            <div class="progress-text text-muted small">${progress}% Complete</div>`
+				<div class="progress-bar-container mb-2 mt-auto">
+					<div class="progress-bar" style="width: ${progress}%" title="${progress}% Complete"></div>
+				</div>
+				<div class="progress-text text-muted small">${progress}% Complete</div>`
+				: "";
+
+		const watchTimeHTML =
+			showProgress && watchTimeSeconds > 0
+				? `<div class="watch-time">
+				<i class="fas fa-clock"></i> ${formattedWatchTime} watched
+			   </div>`
 				: "";
 
 		const levelClass = course.level?.toLowerCase() || "unknown";
@@ -391,39 +464,53 @@ document.addEventListener("DOMContentLoaded", function () {
 		const difficultyBadge = `<div class="difficulty-badge ${levelClass}">${levelText}</div>`;
 
 		card.innerHTML = `
-            <div class="course-image">
-                <img src="${imagePath}" alt="${
+			<div class="course-image">
+				<img src="${imagePath}" alt="${
 			course.title || "Course image"
 		}" loading="lazy" onerror="this.onerror=null; this.src='${fallbackImage}';">
-                ${difficultyBadge}
-            </div>
-            <div class="course-content">
-                <h3 class="course-title">${
-					course.title || "Untitled Course"
-				}</h3>
-                <p class="course-description">${
+				${difficultyBadge}
+			</div>
+			<div class="course-content">
+				<h3 class="course-title">${course.title || "Untitled Course"}</h3>
+				<p class="course-description">${
 					course.description || "No description available."
 				}</p>
-                <div class="course-meta">
-                    <span><i class="material-icons">schedule</i> ${
-						course.duration || "N/A"
-					}</span>
-                    <span><i class="material-icons">category</i> ${
-						course.subject || "N/A"
-					}</span>
-                </div>
-                 ${progressHTML}
-                <a href="course-details.html?id=${
+				<div class="course-meta">
+					<span><i class="material-icons">schedule</i> ${course.duration || "N/A"}</span>
+					<span><i class="material-icons">category</i> ${course.subject || "N/A"}</span>
+				</div>
+				${progressHTML}
+				${watchTimeHTML}
+				<a href="course-details.html?id=${
 					course.id
-				}" class="btn primary-btn btn-sm mt-2 stretched-link">View Course</a>
-            </div>
-        `;
+				}" class="btn primary-btn btn-sm mt-2 stretched-link">
+					${showProgress && progress > 0 ? "Continue Learning" : "View Course"}
+				</a>
+			</div>
+		`;
 
 		card.addEventListener("click", function (event) {
 			// Stretched link handles navigation
 		});
 
 		return card;
+	}
+
+	// Format seconds into HH:MM:SS or MM:SS format
+	function formatWatchTime(seconds) {
+		if (isNaN(seconds) || seconds < 0) seconds = 0;
+
+		const hours = Math.floor(seconds / 3600);
+		const minutes = Math.floor((seconds % 3600) / 60);
+		const secs = Math.floor(seconds % 60);
+
+		if (hours > 0) {
+			return `${hours}h ${minutes}m`;
+		} else if (minutes > 0) {
+			return `${minutes}m ${secs}s`;
+		} else {
+			return `${secs}s`;
+		}
 	}
 
 	// --- Filter Tags ---
