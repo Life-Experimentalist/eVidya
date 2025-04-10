@@ -39,103 +39,110 @@ window.ProgressTracker = window.ProgressTracker || {};
 		return progressData;
 	}
 
-	// Mark a content item as started
-	window.ProgressTracker.markContentStarted = function (courseId, contentId) {
+	// Count total number of items in a course
+	function calculateTotalItems(courseId) {
+		const course = window.courses.find((c) => c.id === courseId);
+		if (!course) return 0;
+
+		let totalItems = 0;
+
+		// Count all videos
+		if (course.sections) {
+			course.sections.forEach((section) => {
+				if (section.videos) {
+					totalItems += section.videos.length;
+				}
+				if (section.quiz) {
+					totalItems += 1; // Count each quiz as one item
+				}
+			});
+		}
+
+		return totalItems;
+	}
+
+	// Mark an item as started
+	window.ProgressTracker.startItem = function (courseId, itemId) {
 		let progressData = getProgressData();
 		progressData = initCourse(progressData, courseId);
 
+		// Update last accessed timestamp
 		progressData[courseId].lastAccessed = new Date().toISOString();
 
-		// Add to started array if not already there
-		if (!progressData[courseId].started.includes(contentId)) {
-			progressData[courseId].started.push(contentId);
+		// Add to started array if not already present
+		if (!progressData[courseId].started.includes(itemId)) {
+			progressData[courseId].started.push(itemId);
+		}
+
+		// Update total items count if not set yet
+		if (!progressData[courseId].totalItems) {
+			progressData[courseId].totalItems = calculateTotalItems(courseId);
 		}
 
 		saveProgressData(progressData);
 	};
 
-	// Mark content as completed
-	window.ProgressTracker.markContentCompleted = function (
-		courseId,
-		contentId
-	) {
+	// Mark an item as completed
+	window.ProgressTracker.completeItem = function (courseId, itemId) {
 		let progressData = getProgressData();
 		progressData = initCourse(progressData, courseId);
 
+		// Update timestamps
 		progressData[courseId].lastAccessed = new Date().toISOString();
 
-		// Add to completed array if not already there
-		if (!progressData[courseId].completed.includes(contentId)) {
-			progressData[courseId].completed.push(contentId);
+		// Add to completed array if not already present
+		if (!progressData[courseId].completed.includes(itemId)) {
+			progressData[courseId].completed.push(itemId);
+		}
+
+		// Update total items count if not set yet
+		if (!progressData[courseId].totalItems) {
+			progressData[courseId].totalItems = calculateTotalItems(courseId);
 		}
 
 		saveProgressData(progressData);
+
+		// Return updated progress info
+		return window.ProgressTracker.getCourseProgress(courseId);
 	};
 
-	// Check if content is completed
-	window.ProgressTracker.isContentCompleted = function (courseId, contentId) {
-		const progressData = getProgressData();
-		return (
-			progressData[courseId] &&
-			progressData[courseId].completed &&
-			progressData[courseId].completed.includes(contentId)
-		);
-	};
-
-	// Check if content is started
-	window.ProgressTracker.isContentStarted = function (courseId, contentId) {
-		const progressData = getProgressData();
-		return (
-			progressData[courseId] &&
-			progressData[courseId].started &&
-			progressData[courseId].started.includes(contentId)
-		);
-	};
-
-	// Get course progress percentage
+	// Get progress percentage for a course
 	window.ProgressTracker.getCourseProgress = function (courseId) {
-		try {
-			// Get course data to count total items
-			let totalItems = 0;
-			let course = null;
+		const progressData = getProgressData();
 
-			if (typeof getCourses === "function") {
-				course = getCourses().find((c) => c.id === courseId);
-			}
-
-			if (course && course.sections) {
-				course.sections.forEach((section) => {
-					if (section.videos) totalItems += section.videos.length;
-					if (section.quiz) totalItems += 1;
-				});
-			}
-
-			const progressData = getProgressData();
-
-			if (!progressData[courseId]) {
-				return {
-					completed: 0,
-					total: totalItems,
-					percentage: 0,
-				};
-			}
-
-			const completed = progressData[courseId].completed
-				? progressData[courseId].completed.length
-				: 0;
-
-			const percentage =
-				totalItems > 0 ? Math.round((completed / totalItems) * 100) : 0;
-
+		// If no progress data exists for this course, initialize it
+		if (!progressData[courseId]) {
+			const updatedData = initCourse(progressData, courseId);
+			updatedData[courseId].totalItems = calculateTotalItems(courseId);
+			saveProgressData(updatedData);
 			return {
-				completed: completed,
-				total: totalItems,
-				percentage: percentage,
+				total: updatedData[courseId].totalItems,
+				completed: 0,
+				started: 0,
+				percentage: 0,
 			};
-		} catch (e) {
-			console.error("Error calculating course progress:", e);
-			return { completed: 0, total: 0, percentage: 0 };
 		}
+
+		// Ensure total items is calculated
+		if (!progressData[courseId].totalItems) {
+			progressData[courseId].totalItems = calculateTotalItems(courseId);
+			saveProgressData(progressData);
+		}
+
+		const total = progressData[courseId].totalItems;
+		const completed = progressData[courseId].completed.length;
+		const started = progressData[courseId].started.length;
+
+		// Calculate percentage, ensuring we don't divide by zero
+		const percentage =
+			total > 0 ? Math.round((completed / total) * 100) : 0;
+
+		return {
+			total,
+			completed,
+			started,
+			percentage,
+		};
 	};
 
 	// Reset course progress
@@ -143,46 +150,48 @@ window.ProgressTracker = window.ProgressTracker || {};
 		let progressData = getProgressData();
 
 		if (progressData[courseId]) {
+			// Keep the total items count but reset progress arrays
+			const totalItems = calculateTotalItems(courseId);
+
 			progressData[courseId] = {
 				started: new Date().toISOString(),
 				lastAccessed: new Date().toISOString(),
 				completed: [],
 				started: [],
+				totalItems: totalItems,
 			};
 
 			saveProgressData(progressData);
+			return true;
 		}
+
+		return false;
 	};
 
-	// Get all courses progress (for dashboard)
-	window.ProgressTracker.getAllCoursesProgress = function () {
+	// Check if a specific item has been completed
+	window.ProgressTracker.isItemCompleted = function (courseId, itemId) {
 		const progressData = getProgressData();
-		const result = [];
 
-		for (const courseId in progressData) {
-			const courseProgress = this.getCourseProgress(courseId);
-			if (courseProgress.total > 0) {
-				result.push({
-					courseId: courseId,
-					completed: courseProgress.completed,
-					total: courseProgress.total,
-					percentage: courseProgress.percentage,
-					lastAccessed: progressData[courseId].lastAccessed,
-				});
-			}
+		if (!progressData[courseId]) {
+			return false;
 		}
 
-		return result;
+		return progressData[courseId].completed.includes(itemId);
 	};
 
-	// For backward compatibility with older API calls
-	window.ProgressTracker.markVideoComplete = function (courseId, videoId) {
-		this.markContentCompleted(courseId, videoId);
-	};
+	// Mark a course as started
+	window.ProgressTracker.startCourse = function (courseId) {
+		let progressData = getProgressData();
+		progressData = initCourse(progressData, courseId);
 
-	window.ProgressTracker.isVideoCompleted = function (courseId, videoId) {
-		return this.isContentCompleted(courseId, videoId);
-	};
+		// Update the last accessed timestamp
+		progressData[courseId].lastAccessed = new Date().toISOString();
 
-	console.log("Progress Tracker module initialized");
+		// Update total items count if not set yet
+		if (!progressData[courseId].totalItems) {
+			progressData[courseId].totalItems = calculateTotalItems(courseId);
+		}
+
+		saveProgressData(progressData);
+	};
 })();

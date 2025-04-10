@@ -1,190 +1,501 @@
 // Wait for the DOM to be fully loaded
 document.addEventListener("DOMContentLoaded", function () {
-	// Get references to DOM elements
+	// --- DOM Elements ---
 	const coursesContainer = document.getElementById("courses-container");
 	const searchInput = document.getElementById("search-input");
-	const searchBtn = document.getElementById("search-btn");
-	const difficultyFilter = document.getElementById("difficulty-filter");
-	const subjectFilter = document.getElementById("subject-filter");
+	const searchBtn = document.getElementById("search-button");
+	const levelFilter = document.getElementById("level-filter");
+	const categoryFilter = document.getElementById("category-filter");
 	const durationFilter = document.getElementById("duration-filter");
+	const instructorFilter = document.getElementById("instructor-filter");
+	const sortByFilter = document.getElementById("sort-by-filter");
+	const applyFiltersButton = document.getElementById("apply-filters");
+	const clearFiltersButton = document.getElementById("clear-filters");
+	const activeFiltersContainer = document.getElementById("active-filters");
+	const filterTagsContainer = document.getElementById("filter-tags");
 	const gridViewBtn = document.getElementById("grid-view-btn");
 	const listViewBtn = document.getElementById("list-view-btn");
-	const noResults = document.getElementById("no-results");
+	const noCoursesMessage = document.getElementById("no-courses-message");
+	const loadingIndicator = document.getElementById("loading-indicator");
+	const currentlyLearningSection = document.getElementById(
+		"currently-learning-section"
+	);
+	const currentlyLearningContainer = document.getElementById(
+		"currently-learning-container"
+	);
+	const noProgressMessage = document.getElementById("no-progress-message");
 
-	// Initialize the page
+	// --- State Variables ---
+	let currentViewMode = "grid"; // Default view: 'grid' or 'list' - will be overwritten by localStorage if available
+	let currentFilters = {
+		category: "",
+		level: "",
+		duration: "",
+		instructor: "",
+		sortBy: "popularity",
+		searchTerm: "",
+	};
+	let courseProgress =
+		JSON.parse(localStorage.getItem("courseProgress")) || {};
+	let allCoursesData = []; // To store the initial course data
+
+	// --- Initialization ---
 	init();
 
 	function init() {
-		// Check if course data is available
-		if (!window.courseData || !window.courseData.courses) {
-			console.error("Course data not found!");
-			showNoResults("Error loading course data");
+		// Ensure essential containers exist
+		if (!coursesContainer || !currentlyLearningContainer) {
+			console.error("Essential course containers not found!");
 			return;
 		}
 
-		// Render all courses initially
-		renderCourses(window.courseData.courses);
+		// Check if course data is loaded
+		if (
+			typeof window.courses === "undefined" ||
+			!Array.isArray(window.courses)
+		) {
+			console.error(
+				"Course data (window.courses) not found or not an array!"
+			);
+			showNoResults(
+				"Error: Could not load course data.",
+				coursesContainer,
+				noCoursesMessage
+			);
+			hideLoading();
+			return;
+		}
+		allCoursesData = window.courses; // Store data
 
-		// Set up event listeners
+		// --- Load persisted view mode ---
+		const savedViewMode = localStorage.getItem("catalogueViewMode");
+		// Validate the saved value, default to 'grid' if invalid or not found
+		if (savedViewMode === "grid" || savedViewMode === "list") {
+			currentViewMode = savedViewMode;
+		} else {
+			currentViewMode = "grid"; // Fallback to default
+		}
+		// --- End Load ---
+
+		setViewModeUI(currentViewMode); // Set button states and container classes based on loaded/default mode
+
+		// Initial render
+		filterAndRenderCourses();
+
+		// Setup listeners
 		setupEventListeners();
 	}
 
+	// --- Event Listeners ---
 	function setupEventListeners() {
-		// Search functionality
-		searchBtn.addEventListener("click", filterCourses);
-		searchInput.addEventListener("keyup", function (event) {
-			if (event.key === "Enter") {
-				filterCourses();
-			}
+		searchBtn?.addEventListener("click", handleSearch);
+		searchInput?.addEventListener("keyup", (event) => {
+			if (event.key === "Enter") handleSearch();
 		});
-
-		// Filter change events
-		difficultyFilter.addEventListener("change", filterCourses);
-		subjectFilter.addEventListener("change", filterCourses);
-		durationFilter.addEventListener("change", filterCourses);
-
-		// View toggle
-		gridViewBtn.addEventListener("click", function () {
-			setViewMode("grid");
-		});
-
-		listViewBtn.addEventListener("click", function () {
-			setViewMode("list");
-		});
+		applyFiltersButton?.addEventListener("click", handleApplyFilters);
+		clearFiltersButton?.addEventListener("click", handleClearFilters);
+		gridViewBtn?.addEventListener("click", () =>
+			setViewModeAndRender("grid")
+		);
+		listViewBtn?.addEventListener("click", () =>
+			setViewModeAndRender("list")
+		);
 	}
 
-	function filterCourses() {
-		const searchTerm = searchInput.value.toLowerCase();
-		const difficulty = difficultyFilter.value;
-		const subject = subjectFilter.value;
-		const duration = durationFilter.value;
-
-		let filteredCourses = window.courseData.courses.filter((course) => {
-			// Filter by search term
-			if (
-				searchTerm &&
-				!course.title.toLowerCase().includes(searchTerm) &&
-				!course.description.toLowerCase().includes(searchTerm)
-			) {
-				return false;
-			}
-
-			// Filter by difficulty
-			if (difficulty && course.difficulty !== difficulty) {
-				return false;
-			}
-
-			// Filter by subject (assuming subject is a property, may need adjustment)
-			if (subject && course.subject !== subject) {
-				return false;
-			}
-
-			// Filter by duration
-			if (duration) {
-				const hours = parseInt(course.duration);
-				if (duration === "0-5" && (hours < 0 || hours > 5))
-					return false;
-				if (duration === "5-10" && (hours < 5 || hours > 10))
-					return false;
-				if (duration === "10+" && hours <= 10) return false;
-			}
-
-			return true;
-		});
-
-		// Render the filtered courses
-		renderCourses(filteredCourses);
+	function handleSearch() {
+		currentFilters.searchTerm = searchInput?.value.trim() || "";
+		filterAndRenderCourses();
 	}
 
-	function renderCourses(courses) {
-		// Remove loading indicator
-		const loadingIndicator =
-			coursesContainer.querySelector(".loading-indicator");
-		if (loadingIndicator) {
-			loadingIndicator.remove();
+	function handleApplyFilters() {
+		currentFilters = {
+			category: categoryFilter?.value || "",
+			level: levelFilter?.value || "",
+			duration: durationFilter?.value || "",
+			instructor: instructorFilter?.value || "",
+			sortBy: sortByFilter?.value || "popularity",
+			searchTerm: searchInput?.value.trim() || "",
+		};
+		filterAndRenderCourses();
+		// Optionally hide the filter panel
+		const advancedFiltersElement =
+			document.getElementById("advancedFilters");
+		const advancedFiltersInstance = advancedFiltersElement
+			? bootstrap.Collapse.getInstance(advancedFiltersElement)
+			: null;
+		advancedFiltersInstance?.hide();
+	}
+
+	function handleClearFilters() {
+		// Reset form elements
+		if (categoryFilter) categoryFilter.value = "";
+		if (levelFilter) levelFilter.value = "";
+		if (durationFilter) durationFilter.value = "";
+		if (instructorFilter) instructorFilter.value = "";
+		if (sortByFilter) sortByFilter.value = "popularity";
+		if (searchInput) searchInput.value = ""; // Clear search input too
+
+		// Reset filters object
+		currentFilters = {
+			category: "",
+			level: "",
+			duration: "",
+			instructor: "",
+			sortBy: "popularity",
+			searchTerm: "",
+		};
+		filterAndRenderCourses();
+	}
+
+	// --- View Mode ---
+	function setViewModeAndRender(mode) {
+		// Only proceed if the mode is actually changing
+		if (mode !== currentViewMode && (mode === "grid" || mode === "list")) {
+			currentViewMode = mode;
+			// --- Persist view mode ---
+			localStorage.setItem("catalogueViewMode", mode);
+			// --- End Persist ---
+			setViewModeUI(mode);
+			// Re-render with the current filtered data, just changing the layout
+			// No need to re-filter, just re-render the list
+			// For simplicity, filterAndRenderCourses handles the rendering part correctly
+			filterAndRenderCourses();
 		}
-
-		// Clear the current courses
-		coursesContainer.innerHTML = "";
-
-		// Show message if no courses match filters
-		if (courses.length === 0) {
-			showNoResults();
-			return;
-		}
-
-		// Hide no results message if showing courses
-		noResults.classList.add("hidden");
-
-		// Render each course
-		courses.forEach((course) => {
-			const courseCard = createCourseCard(course);
-			coursesContainer.appendChild(courseCard);
-		});
 	}
 
-	function createCourseCard(course) {
-		const card = document.createElement("div");
-		card.className = "course-card";
+	function setViewModeUI(mode) {
+		if (!coursesContainer || !gridViewBtn || !listViewBtn) return;
 
-		// Use placeholder image if course image is not available
-		const imageSrc = course.image || "../img/course-placeholder.jpg";
-
-		card.innerHTML = `
-            <div class="course-image">
-                <img src="${imageSrc}" alt="${course.title}">
-                <div class="difficulty-badge ${course.difficulty.toLowerCase()}">${
-			course.difficulty
-		}</div>
-            </div>
-            <div class="course-content">
-                <h3>${course.title}</h3>
-                <p>${course.description}</p>
-                <div class="course-meta">
-                    <span class="instructor"><img src="../img/icons/user.svg" alt="Instructor"> ${
-						course.instructor
-					}</span>
-                    <span class="duration"><img src="../img/icons/clock.svg" alt="Duration"> ${
-						course.duration
-					}</span>
-                </div>
-                <a href="course-details.html?courseId=${
-					course.id
-				}" class="btn btn-primary btn-block">View Course</a>
-            </div>
-        `;
-
-		// Add click event to the card
-		card.addEventListener("click", function (event) {
-			// Prevent redirection if clicking on the button
-			if (!event.target.closest(".btn")) {
-				window.location.href = `course-details.html?courseId=${course.id}`;
-			}
-		});
-
-		return card;
-	}
-
-	function setViewMode(mode) {
 		if (mode === "grid") {
-			coursesContainer.className = "courses-grid";
+			coursesContainer.className = "row g-4"; // Bootstrap grid classes
 			gridViewBtn.classList.add("active");
 			listViewBtn.classList.remove("active");
 		} else {
-			coursesContainer.className = "courses-list";
+			// List view
+			coursesContainer.className = "courses-list-view"; // Custom class for list styling
 			listViewBtn.classList.add("active");
 			gridViewBtn.classList.remove("active");
 		}
 	}
 
-	function showNoResults(message = null) {
-		noResults.classList.remove("hidden");
+	// --- Loading and Messages ---
+	function showLoading() {
+		if (loadingIndicator) loadingIndicator.style.display = "block";
+		if (coursesContainer) coursesContainer.innerHTML = ""; // Clear main course area
+		if (noCoursesMessage) noCoursesMessage.style.display = "none";
+	}
 
-		if (message) {
-			const heading = noResults.querySelector("h2");
-			if (heading) {
-				heading.textContent = message;
-			}
+	function hideLoading() {
+		if (loadingIndicator) loadingIndicator.style.display = "none";
+	}
+
+	function showNoResults(
+		message = "No courses found matching your filters.",
+		container = coursesContainer,
+		messageElement = noCoursesMessage
+	) {
+		if (container) container.innerHTML = ""; // Clear the specific container
+		if (messageElement) {
+			messageElement.textContent = message;
+			messageElement.style.display = "block";
 		}
 	}
-});
+
+	function hideNoResults(messageElement = noCoursesMessage) {
+		if (messageElement) messageElement.style.display = "none";
+	}
+
+	// --- Filtering and Sorting ---
+	function filterAndSortCourses() {
+		let filtered = [...allCoursesData]; // Start with all courses
+
+		// Apply filters (logic remains the same)
+		if (currentFilters.category)
+			filtered = filtered.filter(
+				(c) =>
+					c.subject?.toLowerCase() ===
+					currentFilters.category.toLowerCase()
+			);
+		if (currentFilters.level)
+			filtered = filtered.filter(
+				(c) =>
+					c.level?.toLowerCase() ===
+					currentFilters.level.toLowerCase()
+			);
+		if (currentFilters.instructor)
+			filtered = filtered.filter(
+				(c) =>
+					c.instructor?.toLowerCase() ===
+					currentFilters.instructor.toLowerCase()
+			);
+		if (currentFilters.duration) {
+			filtered = filtered.filter((c) => {
+				const hours = parseInt(c.duration) || 0;
+				if (currentFilters.duration === "short")
+					return hours > 0 && hours < 3;
+				if (currentFilters.duration === "medium")
+					return hours >= 3 && hours <= 10;
+				if (currentFilters.duration === "long") return hours > 10;
+				return false;
+			});
+		}
+		if (currentFilters.searchTerm) {
+			const term = currentFilters.searchTerm.toLowerCase();
+			filtered = filtered.filter(
+				(c) =>
+					c.title?.toLowerCase().includes(term) ||
+					c.description?.toLowerCase().includes(term) ||
+					c.subject?.toLowerCase().includes(term) ||
+					c.instructor?.toLowerCase().includes(term)
+			);
+		}
+
+		// Apply sorting (logic remains the same)
+		switch (currentFilters.sortBy) {
+			case "newest":
+				filtered.sort(
+					(a, b) =>
+						new Date(b.releaseDate || 0) -
+						new Date(a.releaseDate || 0)
+				);
+				break;
+			case "highest-rated":
+				filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+				break;
+			case "a-z":
+				filtered.sort((a, b) => a.title.localeCompare(b.title));
+				break;
+			case "popularity":
+			default:
+				filtered.sort(
+					(a, b) =>
+						(b.enrollments || 0) - (a.enrollments || 0) ||
+						a.title.localeCompare(b.title)
+				);
+				break;
+		}
+		return filtered;
+	}
+
+	// --- Rendering ---
+	function filterAndRenderCourses() {
+		showLoading();
+		updateActiveFilterTags();
+
+		// Render currently learning first (doesn't depend on filters)
+		renderCurrentlyLearning();
+
+		// Use timeout to allow UI updates (loading indicator)
+		setTimeout(() => {
+			const filteredCourses = filterAndSortCourses();
+
+			if (filteredCourses.length === 0) {
+				showNoResults(
+					"No courses found matching your filters.",
+					coursesContainer,
+					noCoursesMessage
+				);
+			} else {
+				hideNoResults(noCoursesMessage);
+				renderCourseList(filteredCourses, coursesContainer);
+			}
+			hideLoading();
+		}, 50); // Shorter delay might be sufficient
+	}
+
+	function renderCourseList(courses, container) {
+		if (!container) return;
+		container.innerHTML = ""; // Clear previous content
+
+		courses.forEach((course) => {
+			const courseCard = createCourseCard(course);
+			let wrapper;
+
+			// Use the currentViewMode state variable to decide the layout
+			if (currentViewMode === "grid") {
+				wrapper = document.createElement("div");
+				wrapper.className =
+					"col-xl-3 col-lg-4 col-md-6 col-sm-6 mb-4 course-card-wrapper";
+				wrapper.appendChild(courseCard);
+			} else {
+				// List view
+				wrapper = document.createElement("div");
+				wrapper.className = "course-card-wrapper";
+				wrapper.appendChild(courseCard);
+			}
+			container.appendChild(wrapper);
+		});
+	}
+
+	function renderCurrentlyLearning() {
+		// Logic remains the same
+		if (
+			!currentlyLearningContainer ||
+			!currentlyLearningSection ||
+			!noProgressMessage
+		)
+			return;
+
+		const inProgressCourses = allCoursesData.filter(
+			(course) =>
+				courseProgress[course.id] && courseProgress[course.id] > 0
+		);
+
+		inProgressCourses.sort(
+			(a, b) => (courseProgress[b.id] || 0) - (courseProgress[a.id] || 0)
+		);
+
+		currentlyLearningContainer.innerHTML = "";
+
+		if (inProgressCourses.length === 0) {
+			currentlyLearningSection.style.display = "none";
+		} else {
+			currentlyLearningSection.style.display = "block";
+			hideNoResults(noProgressMessage);
+
+			inProgressCourses.forEach((course) => {
+				const card = createCourseCard(course, true);
+				const col = document.createElement("div");
+				col.className = "col-lg-4 col-md-6 mb-4";
+				col.appendChild(card);
+				currentlyLearningContainer.appendChild(col);
+			});
+		}
+	}
+
+	function createCourseCard(course, showProgress = false) {
+		// Logic remains the same
+		const card = document.createElement("div");
+		card.className = "course-card";
+
+		let imagePath = `https://picsum.photos/seed/${course.id}/400/225`;
+		if (typeof config?.images?.getCourseImageUrl === "function") {
+			imagePath = config.images.getCourseImageUrl(course);
+		} else if (course.image) {
+			imagePath = course.image;
+		}
+		const fallbackImage = `https://picsum.photos/seed/${course.id}/400/225`;
+
+		const progress = courseProgress[course.id] || 0;
+		const progressHTML =
+			showProgress && progress > 0
+				? `
+            <div class="progress-bar-container mb-2 mt-auto">
+                <div class="progress-bar" style="width: ${progress}%" title="${progress}% Complete"></div>
+            </div>
+            <div class="progress-text text-muted small">${progress}% Complete</div>`
+				: "";
+
+		const levelClass = course.level?.toLowerCase() || "unknown";
+		const levelText = course.level || "N/A";
+		const difficultyBadge = `<div class="difficulty-badge ${levelClass}">${levelText}</div>`;
+
+		card.innerHTML = `
+            <div class="course-image">
+                <img src="${imagePath}" alt="${
+			course.title || "Course image"
+		}" loading="lazy" onerror="this.onerror=null; this.src='${fallbackImage}';">
+                ${difficultyBadge}
+            </div>
+            <div class="course-content">
+                <h3 class="course-title">${
+					course.title || "Untitled Course"
+				}</h3>
+                <p class="course-description">${
+					course.description || "No description available."
+				}</p>
+                <div class="course-meta">
+                    <span><i class="material-icons">schedule</i> ${
+						course.duration || "N/A"
+					}</span>
+                    <span><i class="material-icons">category</i> ${
+						course.subject || "N/A"
+					}</span>
+                </div>
+                 ${progressHTML}
+                <a href="course-details.html?id=${
+					course.id
+				}" class="btn primary-btn btn-sm mt-2 stretched-link">View Course</a>
+            </div>
+        `;
+
+		card.addEventListener("click", function (event) {
+			// Stretched link handles navigation
+		});
+
+		return card;
+	}
+
+	// --- Filter Tags ---
+	function updateActiveFilterTags() {
+		// Logic remains the same
+		if (!activeFiltersContainer || !filterTagsContainer) return;
+
+		const activeFilterEntries = Object.entries(currentFilters).filter(
+			([key, value]) =>
+				value &&
+				!(key === "sortBy" && value === "popularity") &&
+				key !== "searchTerm"
+		);
+
+		if (activeFilterEntries.length === 0 && !currentFilters.searchTerm) {
+			activeFiltersContainer.classList.add("d-none");
+			return;
+		}
+
+		activeFiltersContainer.classList.remove("d-none");
+		filterTagsContainer.innerHTML = "";
+
+		if (currentFilters.searchTerm) {
+			addFilterTag(
+				"Search",
+				`"${currentFilters.searchTerm}"`,
+				"searchTerm"
+			);
+		}
+
+		activeFilterEntries.forEach(([key, value]) => {
+			let label = key.charAt(0).toUpperCase() + key.slice(1);
+			let textValue = value;
+			const selectElement = document.getElementById(`${key}-filter`);
+			if (selectElement) {
+				const selectedOption = selectElement.querySelector(
+					`option[value="${value}"]`
+				);
+				if (selectedOption) {
+					textValue = selectedOption.textContent;
+				}
+			}
+			addFilterTag(label, textValue, key);
+		});
+	}
+
+	function addFilterTag(label, value, filterKey) {
+		// Logic remains the same
+		if (!filterTagsContainer) return;
+		const tag = document.createElement("span");
+		tag.className = "badge bg-light text-dark border filter-tag me-1 mb-1";
+		tag.innerHTML = `${label}: ${value} <i class="fas fa-times ms-1 remove-filter" data-filter="${filterKey}" role="button" title="Remove filter"></i>`;
+		filterTagsContainer.appendChild(tag);
+
+		tag.querySelector(".remove-filter")?.addEventListener(
+			"click",
+			function () {
+				const filterType = this.dataset.filter;
+				const filterElement = document.getElementById(
+					`${filterType}-filter`
+				);
+				if (filterElement)
+					filterElement.value =
+						filterType === "sortBy" ? "popularity" : "";
+				if (filterType === "searchTerm" && searchInput)
+					searchInput.value = "";
+
+				currentFilters[filterType] =
+					filterType === "sortBy" ? "popularity" : "";
+
+				filterAndRenderCourses();
+			}
+		);
+	}
+}); // End DOMContentLoaded

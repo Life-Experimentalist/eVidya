@@ -9,6 +9,8 @@ class GeminiAI {
 		this.apiKey = apiKey || config?.gemini?.getApiKey();
 		this.apiEndpoint =
 			"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent";
+		this.baseUrl = "https://generativelanguage.googleapis.com/v1beta/models";
+		this.model = "gemini-pro"; // Default model
 	}
 
 	/**
@@ -17,6 +19,13 @@ class GeminiAI {
 	 */
 	setApiKey(apiKey) {
 		this.apiKey = apiKey;
+	}
+
+	/**
+	 * Updates the API key if it has changed
+	 */
+	updateApiKey() {
+		this.apiKey = config.gemini.getApiKey();
 	}
 
 	/**
@@ -115,27 +124,114 @@ class GeminiAI {
 	 * @returns {Promise<string>} - The answer to the question
 	 */
 	async answerCourseQuestion(question, courseData) {
+		this.updateApiKey(); // Ensure we have the latest API key
+
+		if (!this.apiKey) {
+			throw new Error(
+				"API key not configured. Please set up your Gemini API key in settings."
+			);
+		}
+
 		try {
-			// Prepare context from course data
-			const courseContext = `
-                Course title: ${courseData.title}
-                Subject: ${courseData.subject}
-                Level: ${courseData.level}
-                Description: ${courseData.description}
-            `;
+			// Create system instructions with course context
+			const systemInstruction = `You are an AI learning assistant for the eVidya online learning platform.
+            You're helping with a course titled "${courseData.title || "Unknown"}".
+            Course description: ${courseData.description || "Not provided"}.
+            Course category: ${courseData.category || "General"}.
+            Course level: ${courseData.level || "All levels"}.
 
-			// Get relevant course material if available
-			const courseMaterial = courseData.content || "";
+            Answer the student's question thoroughly but concisely. If you don't know the answer, say so clearly.
+            Include helpful explanations and examples when appropriate.
+            Focus on educational content and avoid any unrelated discussions.`;
 
-			const response = await this.generateResponse(question, {
-				courseContext,
-				courseMaterial,
-				temperature: 0.3, // Lower temperature for more accurate/factual responses
-			});
+			// Format the request
+			const prompt = {
+				contents: [
+					{
+						role: "system",
+						parts: [{ text: systemInstruction }],
+					},
+					{
+						role: "user",
+						parts: [{ text: question }],
+					},
+				],
+			};
 
-			return response.text;
+			// Make the API request
+			const response = await fetch(
+				`${this.baseUrl}/${this.model}:generateContent?key=${this.apiKey}`,
+				{
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify(prompt),
+				}
+			);
+
+			// Parse the response
+			const data = await response.json();
+
+			// Check for errors
+			if (data.error) {
+				throw new Error(`API Error: ${data.error.message}`);
+			}
+
+			// Extract the response text
+			return data.candidates[0].content.parts[0].text;
 		} catch (error) {
-			return `Error answering your question: ${error.message}`;
+			console.error("Error calling Gemini API:", error);
+			throw error;
+		}
+	}
+
+	/**
+	 * Generate text based on a prompt
+	 * @param {string} prompt - The prompt to generate text from
+	 * @returns {Promise<string>} - The generated text
+	 */
+	async generateText(prompt) {
+		this.updateApiKey(); // Ensure we have the latest API key
+
+		if (!this.apiKey) {
+			throw new Error(
+				"API key not configured. Please set up your Gemini API key in settings."
+			);
+		}
+
+		try {
+			// Format the request
+			const requestBody = {
+				contents: [
+					{
+						role: "user",
+						parts: [{ text: prompt }],
+					},
+				],
+			};
+
+			// Make the API request
+			const response = await fetch(
+				`${this.baseUrl}/${this.model}:generateContent?key=${this.apiKey}`,
+				{
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify(requestBody),
+				}
+			);
+
+			// Parse the response
+			const data = await response.json();
+
+			// Check for errors
+			if (data.error) {
+				throw new Error(`API Error: ${data.error.message}`);
+			}
+
+			// Extract the response text
+			return data.candidates[0].content.parts[0].text;
+		} catch (error) {
+			console.error("Error calling Gemini API:", error);
+			throw error;
 		}
 	}
 }

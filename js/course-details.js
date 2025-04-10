@@ -1,408 +1,1012 @@
 // Course details page functionality
 
 document.addEventListener("DOMContentLoaded", function () {
-	// Get the selected course ID from storage (default to 1 now for functional programming)
+	// Get the course ID from URL parameters
+	const urlParams = new URLSearchParams(window.location.search);
+	const courseId = urlParams.get("id");
+
+	// If no course ID in URL, try to get from localStorage
 	const selectedCourseId =
-		parseInt(localStorage.getItem("selectedCourseId")) || 1;
+		courseId || localStorage.getItem("selectedCourseId");
 
-	// Get course data from storage using the enhanced StorageManager
-	const currentCourse = StorageManager.getCourseData(selectedCourseId);
-
-	if (!currentCourse) {
-		console.error("Course not found in storage");
-		return; // Exit if course data is not found
+	if (!selectedCourseId) {
+		showError(
+			"No course selected. Please go back to the course listing and select a course."
+		);
+		return;
 	}
 
-	// Get video data for this course
-	const courseVideos = courseVideos[selectedCourseId] || [];
+	// Find the course from the courses array in course-data.js
+	const currentCourse = window.courses.find(
+		(course) => course.id === selectedCourseId
+	);
+
+	if (!currentCourse) {
+		showError(
+			"Course not found. Please go back to the course listing and select a valid course."
+		);
+		return;
+	}
+
+	console.log("Course found:", currentCourse);
 
 	// Update page title with course name
-	document.title = currentCourse.title;
+	document.title = `${currentCourse.title} - eVidya`;
 
-	// Set course title and other details
+	// Set course title and description
 	const courseTitle = document.getElementById("course-title");
 	if (courseTitle) {
 		courseTitle.textContent = currentCourse.title;
 	}
 
-	// Update all instances of course title in the page
-	const courseTitleElements = document.querySelectorAll(
-		".dynamic-course-title"
+	const courseDescription = document.getElementById("course-description");
+	if (courseDescription) {
+		courseDescription.innerHTML = `<span class="badge bg-${getLevelBadgeClass(
+			currentCourse.level
+		)} me-2">${currentCourse.level}</span> ${currentCourse.duration} | ${
+			currentCourse.subject
+		}`;
+	}
+
+	// Initialize Bootstrap modals
+	const videoModal = new bootstrap.Modal(
+		document.getElementById("videoModal")
 	);
-	courseTitleElements.forEach((element) => {
-		element.textContent = currentCourse.title;
-	});
+	const quizModal = new bootstrap.Modal(document.getElementById("quizModal"));
 
-	// Get section titles for this course
-	const sectionTitles = CourseSections[selectedCourseId] || [
-		"Getting Started",
-		"Advanced Topics",
-	];
+	// YouTube API variables
+	let youtubePlayer = null;
+	let currentVideoId = null;
+	let currentVideoData = null;
+	let videoStartTime = 0;
+	let watchTimeInterval = null;
+	let totalWatchTime = 0;
+	let allVideosInCourse = [];
+	let currentVideoIndex = -1;
 
-	// Update section titles based on course
-	const sectionTitleElements = document.querySelectorAll(".section-title");
-	sectionTitleElements.forEach((element, index) => {
-		if (index < sectionTitles.length) {
-			element.textContent = sectionTitles[index];
-		}
-	});
-
-	// Update progress bar and text
-	const progressBar = document.querySelector(".progress");
-	const progressText = document.querySelector(".progress-text");
-	if (progressBar) {
-		progressBar.style.width = `${currentCourse.progress || 0}%`;
-	}
-	if (progressText) {
-		progressText.textContent = `Your progress: ${
-			currentCourse.progress || 0
-		}%`;
-	}
-
-	// Add a back button to return to courses page
-	const backButton = document.createElement("button");
-	backButton.className = "btn btn-secondary mt-3 mb-5";
-	backButton.textContent = "Back to Courses";
-	backButton.addEventListener("click", function () {
-		window.location.href = "courses.html";
-	});
-
-	// Insert the back button at the top of the page
-	const courseContainer = document.querySelector(".container");
-	if (courseContainer) {
-		courseContainer.insertBefore(backButton, courseContainer.firstChild);
-	}
-
-	// Add a reset progress button
-	const resetButton = document.createElement("button");
-	resetButton.className = "btn btn-danger mt-3 mb-5 ms-2";
-	resetButton.textContent = "Reset Progress";
-	resetButton.addEventListener("click", function () {
-		if (
-			confirm(
-				"Are you sure you want to reset your progress for this course?"
-			)
-		) {
-			// Reset just this course
-			StorageManager.updateCourseData(selectedCourseId, {
-				completed: 0,
-				completedVideos: [],
-				progress: 0,
-				grade: null,
-				quizCompleted: false,
-			});
-
-			// Refresh the page
-			window.location.reload();
-		}
-	});
-
-	// Add the reset button next to the back button
-	if (courseContainer && backButton.parentNode) {
-		backButton.parentNode.insertBefore(resetButton, backButton.nextSibling);
-	}
-
-	// Replace the existing video containers with YouTube iframes
-	const videoContainers = document.querySelectorAll(".video-container");
-	videoContainers.forEach((container, index) => {
-		const videoIndex = parseInt(container.dataset.videoIndex);
-		const videoData = courseVideos[videoIndex];
-
-		if (!videoData) return; // Skip if no data for this index
-
-		// Update video title in the heading
-		const lessonItem = container.closest(".lesson-item");
-		const heading = lessonItem.querySelector("h3");
-		if (heading) {
-			heading.textContent = videoData.title;
-		}
-
-		// Check if this video was already completed
-		if (
-			currentCourse.completedVideos &&
-			currentCourse.completedVideos.includes(videoIndex)
-		) {
-			if (lessonItem && !lessonItem.querySelector(".badge")) {
-				const completedBadge = document.createElement("span");
-				completedBadge.className = "badge bg-success ms-2";
-				completedBadge.textContent = "Completed";
-
-				if (heading) {
-					heading.appendChild(completedBadge);
-				}
-			}
-		}
-
-		// Clear container content
-		container.innerHTML = "";
-
-		// Add a placeholder and loading indicator
-		const placeholder = document.createElement("div");
-		placeholder.className = "video-placeholder";
-		placeholder.innerHTML = `
-      <div class="d-flex justify-content-center align-items-center h-100">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-        <span class="ms-2">Loading video...</span>
-      </div>
-    `;
-		container.appendChild(placeholder);
-
-		// Create YouTube iframe - directly insert it without setTimeout to prevent duplicate loading
-		const iframe = document.createElement("iframe");
-		iframe.className = "youtube-video";
-		iframe.id = `youtube-player-${videoIndex}`;
-		iframe.width = "100%";
-		iframe.height = "400";
-		iframe.src = videoData.youtube;
-		iframe.title = videoData.title;
-		iframe.frameBorder = "0";
-		iframe.allow =
-			"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-		iframe.allowFullscreen = true;
-
-		// Directly append the iframe and remove the placeholder when loaded
-		container.appendChild(iframe);
-
-		// Add event listener to remove placeholder when iframe loads
-		iframe.addEventListener("load", function () {
-			if (placeholder && placeholder.parentNode) {
-				placeholder.parentNode.removeChild(placeholder);
-			}
-		});
-	});
-
-	// YouTube API Integration with error handling
-	let players = [];
-	let apiLoaded = false;
-
-	// This function will be called when YouTube API is ready
-	window.onYouTubeIframeAPIReady = function () {
-		apiLoaded = true;
-		console.log("YouTube API loaded successfully");
-
-		// Initialize all YouTube players
-		document.querySelectorAll(".youtube-video").forEach((frame) => {
-			const videoContainer = frame.closest(".video-container");
-			const videoIndex = parseInt(videoContainer.dataset.videoIndex);
-
-			try {
-				// Create a player for each video using the iframe ID
-				const player = new YT.Player(frame.id, {
-					events: {
-						onReady: function (event) {
-							console.log(`Player ${videoIndex} ready`);
-							// Remove any remaining loading indicators
-							const placeholder =
-								videoContainer.querySelector(
-									".video-placeholder"
-								);
-							if (placeholder) placeholder.remove();
-						},
-						onStateChange: function (event) {
-							// YT.PlayerState.ENDED = 0
-							if (event.data === 0) {
-								// Video has ended - mark as completed
-								trackVideoCompletion(videoIndex);
-							}
-						},
-						onError: function (event) {
-							// Handle YouTube player errors
-							console.error(
-								`YouTube player ${videoIndex} error:`,
-								event.data
-							);
-							const errorMessages = {
-								2: "Invalid video URL",
-								5: "HTML5 player error",
-								100: "Video not found or removed",
-								101: "Video embedding not allowed",
-								150: "Video embedding not allowed",
-							};
-
-							const message =
-								errorMessages[event.data] ||
-								"An error occurred with the video";
-
-							// Show error message in the container
-							const errorDiv = document.createElement("div");
-							errorDiv.className = "alert alert-warning mt-2 p-2";
-							errorDiv.innerHTML = `<small>${message}</small>`;
-							videoContainer.appendChild(errorDiv);
-						},
-					},
-				});
-
-				players.push({
-					player: player,
-					videoIndex: videoIndex,
-				});
-			} catch (error) {
-				console.error(
-					`Error initializing YouTube player ${videoIndex}:`,
-					error
-				);
-				videoContainer.innerHTML += `
-                <div class="alert alert-danger mt-2 p-2">
-                    <small>Error loading video player. Please refresh the page and try again.</small>
-                </div>
-            `;
-			}
-		});
+	// Load user progress data from localStorage
+	let userProgress = JSON.parse(
+		localStorage.getItem(`progress_${selectedCourseId}`)
+	) || {
+		completedVideos: [],
+		quizResults: {},
+		overallProgress: 0,
+		totalWatchTime: 0, // In seconds
 	};
 
-	// Function to track video completion
-	function trackVideoCompletion(videoIndex) {
-		const result = StorageManager.trackVideoCompletion(
-			selectedCourseId,
-			videoIndex
+	// If totalWatchTime wasn't previously tracked, initialize it
+	if (userProgress.totalWatchTime === undefined) {
+		userProgress.totalWatchTime = 0;
+	}
+
+	totalWatchTime = userProgress.totalWatchTime;
+
+	// Extract all videos from the course and flatten them into a single array
+	if (currentCourse.sections && currentCourse.sections.length > 0) {
+		currentCourse.sections.forEach((section) => {
+			if (section.videos && section.videos.length > 0) {
+				allVideosInCourse = [...allVideosInCourse, ...section.videos];
+			}
+		});
+	}
+
+	// Update progress bar
+	updateProgressBar(userProgress.overallProgress || 0);
+
+	// Render course content
+	renderCourseContent(currentCourse, userProgress);
+
+	// Set up YouTube API
+	window.onYouTubeIframeAPIReady = function () {
+		console.log("YouTube API Ready");
+		// The player will be created when a video is selected
+	};
+
+	// Handle navigation buttons in video modal
+	document
+		.getElementById("prevVideoBtn")
+		.addEventListener("click", function () {
+			navigateVideo("prev");
+		});
+
+	document
+		.getElementById("nextVideoBtn")
+		.addEventListener("click", function () {
+			navigateVideo("next");
+		});
+
+	// Function to navigate between videos
+	function navigateVideo(direction) {
+		if (currentVideoIndex === -1 || allVideosInCourse.length === 0) return;
+
+		let newIndex = currentVideoIndex;
+
+		if (direction === "prev") {
+			newIndex = Math.max(0, currentVideoIndex - 1);
+		} else if (direction === "next") {
+			newIndex = Math.min(
+				allVideosInCourse.length - 1,
+				currentVideoIndex + 1
+			);
+		}
+
+		// Only change if we're actually moving to a different video
+		if (newIndex !== currentVideoIndex) {
+			// Save watch time for current video before switching
+			saveCurrentWatchTime();
+
+			// Open the new video
+			openVideoModal(allVideosInCourse[newIndex]);
+		}
+	}
+
+	// Handle video completion button in modal
+	document
+		.getElementById("markVideoCompleted")
+		.addEventListener("click", function () {
+			const videoId = this.getAttribute("data-video-id");
+			if (videoId) {
+				markVideoAsCompleted(videoId);
+
+				// Update the video item in the course list
+				const videoItem = document.querySelector(
+					`.video-item[data-video-id="${videoId}"]`
+				);
+				if (videoItem) {
+					videoItem.classList.add(
+						"video-completed",
+						"list-group-item-success"
+					);
+					const badge = videoItem.querySelector(".video-badge");
+					if (!badge) {
+						const newBadge = document.createElement("span");
+						newBadge.className =
+							"badge bg-success ms-2 video-badge";
+						newBadge.textContent = "Completed";
+						videoItem.querySelector("h5").appendChild(newBadge);
+					}
+				}
+
+				this.disabled = true;
+				this.innerHTML =
+					'<i class="fas fa-check-circle me-2"></i>Already Completed';
+			}
+		});
+
+	// Set up reset progress button
+	const resetBtn = document.getElementById("reset-progress-btn");
+	if (resetBtn) {
+		resetBtn.addEventListener("click", function () {
+			if (
+				confirm(
+					"Are you sure you want to reset your progress for this course? This will reset your completed videos, quiz results, and watch time."
+				)
+			) {
+				// Reset progress for this course
+				localStorage.setItem(
+					`progress_${selectedCourseId}`,
+					JSON.stringify({
+						completedVideos: [],
+						quizResults: {},
+						overallProgress: 0,
+						totalWatchTime: 0,
+					})
+				);
+
+				// Refresh the page
+				window.location.reload();
+			}
+		});
+	}
+
+	// Helper function to show error messages
+	function showError(message) {
+		const courseContent = document.getElementById("course-content");
+		if (courseContent) {
+			courseContent.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle me-2"></i>${message}
+                </div>
+                <a href="./catalogue.html" class="btn btn-primary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Course Catalogue
+                </a>
+            `;
+		}
+		console.error(message);
+	}
+
+	// Helper function to determine badge color based on level
+	function getLevelBadgeClass(level) {
+		switch (level?.toLowerCase()) {
+			case "beginner":
+				return "success";
+			case "intermediate":
+				return "warning";
+			case "advanced":
+				return "danger";
+			default:
+				return "secondary";
+		}
+	}
+
+	// Function to update progress bar
+	function updateProgressBar(progress) {
+		console.log("Updating progress bar:", progress);
+		const progressBar = document.getElementById("progress-bar");
+		const progressDetails = document.getElementById("progress-details");
+
+		if (progressBar) {
+			progressBar.style.width = `${progress}%`;
+			progressBar.textContent = `${progress}%`;
+			progressBar.setAttribute("aria-valuenow", progress);
+		}
+
+		if (progressDetails) {
+			// Include total watch time in the progress details
+			const formattedWatchTime = formatWatchTime(totalWatchTime);
+			progressDetails.innerHTML = `<i class="fas fa-chart-line me-2"></i>Completed ${progress}% of course content | <i class="fas fa-clock me-1"></i>Total watch time: ${formattedWatchTime}`;
+		}
+	}
+
+	// Format seconds into HH:MM:SS or MM:SS format
+	function formatWatchTime(seconds) {
+		if (isNaN(seconds) || seconds < 0) seconds = 0;
+
+		const hours = Math.floor(seconds / 3600);
+		const minutes = Math.floor((seconds % 3600) / 60);
+		const secs = Math.floor(seconds % 60);
+
+		if (hours > 0) {
+			return `${hours}:${minutes.toString().padStart(2, "0")}:${secs
+				.toString()
+				.padStart(2, "0")}`;
+		} else {
+			return `${minutes}:${secs.toString().padStart(2, "0")}`;
+		}
+	}
+
+	// Function to save the current watch time
+	function saveCurrentWatchTime() {
+		if (youtubePlayer && currentVideoId) {
+			try {
+				// Get current video time and calculate elapsed watch time
+				const currentTime = youtubePlayer.getCurrentTime();
+				const elapsedTime = Math.round(currentTime - videoStartTime);
+
+				if (elapsedTime > 0) {
+					// Add to total watch time
+					totalWatchTime += elapsedTime;
+					userProgress.totalWatchTime = totalWatchTime;
+
+					// Save to localStorage
+					localStorage.setItem(
+						`progress_${selectedCourseId}`,
+						JSON.stringify(userProgress)
+					);
+
+					// Update UI
+					updateProgressBar(userProgress.overallProgress || 0);
+
+					console.log(
+						`Added ${elapsedTime}s watch time. Total: ${totalWatchTime}s`
+					);
+				}
+
+				// Reset start time for next measurement
+				videoStartTime = currentTime;
+			} catch (e) {
+				console.error("Error saving watch time:", e);
+			}
+		}
+	}
+
+	// Function to calculate and update course progress
+	function calculateProgress(course, userProgress) {
+		// Count total content items (videos + quizzes)
+		let totalItems = 0;
+		let completedItems = 0;
+
+		// Count videos and completed videos
+		course.sections.forEach((section) => {
+			if (section.videos) totalItems += section.videos.length;
+			if (section.quiz) totalItems += 1;
+		});
+
+		// Count completed videos
+		completedItems = userProgress.completedVideos.length;
+
+		// Count completed quizzes
+		Object.keys(userProgress.quizResults || {}).forEach((quizId) => {
+			if (
+				userProgress.quizResults[quizId] &&
+				userProgress.quizResults[quizId].completed
+			) {
+				completedItems++;
+			}
+		});
+
+		// Calculate percentage
+		const progress =
+			totalItems > 0
+				? Math.round((completedItems / totalItems) * 100)
+				: 0;
+
+		// Update user progress
+		userProgress.overallProgress = progress;
+		localStorage.setItem(
+			`progress_${selectedCourseId}`,
+			JSON.stringify(userProgress)
 		);
 
-		if (result) {
-			// Update progress bar
-			const progressBar = document.querySelector(".progress");
-			const progressText = document.querySelector(".progress-text");
+		// Update progress bar
+		updateProgressBar(progress);
 
-			if (progressBar) {
-				progressBar.style.width = `${result.progress}%`;
-			}
+		return progress;
+	}
 
-			if (progressText) {
-				progressText.textContent = `Your progress: ${result.progress}%`;
-			}
+	// Function to render course content
+	function renderCourseContent(course, userProgress) {
+		const courseContent = document.getElementById("course-content");
+		if (!courseContent) {
+			console.error("Course content container not found");
+			return;
+		}
 
-			// Add completed badge to the video item if not already present
-			const videoContainer = document.querySelector(
-				`.video-container[data-video-index="${videoIndex}"]`
-			);
-			const videoItem = videoContainer
-				? videoContainer.closest(".lesson-item")
-				: null;
+		console.log("Rendering course content");
 
-			if (videoItem && !videoItem.querySelector(".badge")) {
-				const completedBadge = document.createElement("span");
-				completedBadge.className = "badge bg-success ms-2";
-				completedBadge.textContent = "Completed";
+		// Clear loading message
+		courseContent.innerHTML = "";
 
-				const videoTitle = videoItem.querySelector("h3");
-				if (videoTitle) {
-					videoTitle.appendChild(completedBadge);
+		// Create container for sections
+		const sectionsContainer = document.createElement("div");
+		sectionsContainer.className = "course-sections";
+
+		// Render each section
+		if (course.sections && course.sections.length > 0) {
+			course.sections.forEach((section, sectionIndex) => {
+				console.log("Rendering section:", section.title);
+
+				// Create section container
+				const sectionDiv = document.createElement("div");
+				sectionDiv.className = "section-container mb-5";
+
+				// Add section title
+				const sectionTitle = document.createElement("h2");
+				sectionTitle.className = "section-title mb-4";
+				sectionTitle.innerHTML = `<i class="fas fa-book me-2"></i>${section.title}`;
+				sectionDiv.appendChild(sectionTitle);
+
+				// Create section content container
+				const sectionContent = document.createElement("div");
+				sectionContent.className = "section-content";
+
+				// Create videos list
+				const videosList = document.createElement("div");
+				videosList.className = "section-videos list-group mb-4";
+
+				// Render videos
+				if (section.videos && section.videos.length > 0) {
+					section.videos.forEach((video, videoIndex) => {
+						// Create video list item
+						const videoItem = document.createElement("div");
+						videoItem.className =
+							"list-group-item list-group-item-action video-item";
+						videoItem.setAttribute("data-video-id", video.id);
+
+						// Check if video is completed
+						const isCompleted =
+							userProgress.completedVideos.includes(video.id);
+						if (isCompleted) {
+							videoItem.classList.add(
+								"list-group-item-success",
+								"video-completed"
+							);
+						}
+
+						// Set video content
+						videoItem.innerHTML = `
+                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                <h5 class="mb-1">
+                                    <i class="fas fa-play-circle me-2"></i>${
+										video.title
+									}
+                                    ${
+										isCompleted
+											? '<span class="badge bg-success ms-2 video-badge">Completed</span>'
+											: ""
+									}
+                                </h5>
+                                <button class="btn btn-sm btn-primary watch-video-btn">
+                                    <i class="fas fa-play me-1"></i> Watch
+                                </button>
+                            </div>
+                            <p class="text-muted small mb-0">${
+								video.description
+									? video.description.substring(0, 120) +
+									  (video.description.length > 120
+											? "..."
+											: "")
+									: ""
+							}</p>
+                        `;
+
+						// Add click event to open video modal
+						videoItem
+							.querySelector(".watch-video-btn")
+							.addEventListener("click", function (e) {
+								e.stopPropagation(); // Prevent the parent click event
+								openVideoModal(video);
+							});
+
+						// Make the entire item clickable
+						videoItem.addEventListener("click", function () {
+							openVideoModal(video);
+						});
+
+						// Add to videos container
+						videosList.appendChild(videoItem);
+					});
 				}
+
+				// Add videos list to section content
+				sectionContent.appendChild(videosList);
+
+				// Render quiz if available
+				if (section.quiz) {
+					const quizContainer = document.createElement("div");
+					quizContainer.className = "section-quiz mb-4";
+
+					// Create quiz item
+					const quizItem = document.createElement("div");
+					quizItem.className =
+						"list-group-item list-group-item-action quiz-item";
+					quizItem.setAttribute("data-quiz-id", section.quiz.id);
+
+					// Check if quiz is completed
+					const quizResult =
+						userProgress.quizResults &&
+						userProgress.quizResults[section.quiz.id];
+					const isQuizCompleted = quizResult && quizResult.completed;
+
+					if (isQuizCompleted) {
+						quizItem.classList.add("list-group-item-success");
+					}
+
+					// Set quiz content
+					quizItem.innerHTML = `
+                        <div class="d-flex w-100 justify-content-between align-items-center">
+                            <h5 class="mb-1">
+                                <i class="fas fa-question-circle me-2"></i>${
+									section.quiz.title
+								}
+                                ${
+									isQuizCompleted
+										? `<span class="badge bg-success ms-2">Completed (Score: ${quizResult.score}%)</span>`
+										: ""
+								}
+                            </h5>
+                            <button class="btn btn-sm btn-${
+								isQuizCompleted ? "outline-primary" : "primary"
+							} take-quiz-btn">
+                                <i class="fas fa-${
+									isQuizCompleted ? "redo" : "question-circle"
+								} me-1"></i>
+                                ${isQuizCompleted ? "Retake Quiz" : "Take Quiz"}
+                            </button>
+                        </div>
+                        <p class="text-muted small mb-0">
+                            ${
+								section.quiz.questions
+									? section.quiz.questions.length
+									: 0
+							} questions to test your knowledge
+                        </p>
+                    `;
+
+					// Add click event to open quiz modal
+					quizItem
+						.querySelector(".take-quiz-btn")
+						.addEventListener("click", function (e) {
+							e.stopPropagation(); // Prevent the parent click event
+							openQuizModal(section.quiz);
+						});
+
+					// Make the entire item clickable
+					quizItem.addEventListener("click", function () {
+						openQuizModal(section.quiz);
+					});
+
+					// Add to container
+					quizContainer.appendChild(quizItem);
+					sectionContent.appendChild(quizContainer);
+				}
+
+				// Add section content to section container
+				sectionDiv.appendChild(sectionContent);
+
+				// Add the section to the main container
+				sectionsContainer.appendChild(sectionDiv);
+			});
+		} else {
+			// No sections found
+			sectionsContainer.innerHTML = `
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>No content has been added to this course yet.
+                </div>
+            `;
+		}
+
+		// Add all sections to course content
+		courseContent.appendChild(sectionsContainer);
+
+		// Calculate initial progress
+		calculateProgress(course, userProgress);
+	}
+
+	// Function to open video in modal
+	function openVideoModal(video) {
+		// Save watch time of the current video before loading a new one
+		if (youtubePlayer && currentVideoId && currentVideoId !== video.id) {
+			saveCurrentWatchTime();
+		}
+
+		// Set the current video data
+		currentVideoId = video.id;
+		currentVideoData = video;
+		currentVideoIndex = allVideosInCourse.findIndex(
+			(v) => v.id === video.id
+		);
+
+		// Update navigation button states
+		document.getElementById("prevVideoBtn").disabled =
+			currentVideoIndex <= 0;
+		document.getElementById("nextVideoBtn").disabled =
+			currentVideoIndex >= allVideosInCourse.length - 1;
+
+		// Set modal title
+		document.getElementById("videoModalLabel").textContent = video.title;
+
+		// Clear any existing player
+		const videoContent = document.getElementById("videoModalContent");
+		videoContent.innerHTML = "";
+
+		// Create a div for the player
+		const playerDiv = document.createElement("div");
+		playerDiv.id = "youtube-player";
+		videoContent.appendChild(playerDiv);
+
+		// Extract YouTube video ID from the URL or use provided videoId
+		let youtubeVideoId;
+		if (video.videoId) {
+			youtubeVideoId = video.videoId;
+		} else if (video.url) {
+			// Extract ID from various YouTube URL formats
+			const match = video.url.match(
+				/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/
+			);
+			youtubeVideoId = match && match[1];
+		}
+
+		if (!youtubeVideoId) {
+			videoContent.innerHTML = `<div class="alert alert-warning">Invalid YouTube video URL or ID</div>`;
+			return;
+		}
+
+		// Set description
+		const videoDescription = document.getElementById("videoDescription");
+		if (video.description) {
+			videoDescription.innerHTML = `<p>${video.description}</p>`;
+			videoDescription.classList.remove("d-none");
+		} else {
+			videoDescription.innerHTML = "";
+			videoDescription.classList.add("d-none");
+		}
+
+		// Show watch stats container
+		document
+			.getElementById("videoWatchStats")
+			.classList.remove("d-none");
+		document.getElementById("videoWatchTime").innerHTML =
+			'<i class="fas fa-clock me-1"></i>Watch time: 0:00';
+
+		// Set up the complete button with the video ID
+		const completeButton = document.getElementById("markVideoCompleted");
+		completeButton.setAttribute("data-video-id", video.id);
+
+		// If the video is already completed, disable the complete button
+		const isCompleted = userProgress.completedVideos.includes(video.id);
+		completeButton.disabled = isCompleted;
+		completeButton.innerHTML = isCompleted
+			? '<i class="fas fa-check-circle me-2"></i>Already Completed'
+			: '<i class="fas fa-check-circle me-2"></i>Mark as Completed';
+
+		// Create a new YouTube player
+		if (typeof YT !== "undefined" && YT.Player) {
+			youtubePlayer = new YT.Player("youtube-player", {
+				height: "390",
+				width: "100%",
+				videoId: youtubeVideoId,
+				playerVars: {
+					playsinline: 1,
+					rel: 0,
+				},
+				events: {
+					onReady: onPlayerReady,
+					onStateChange: onPlayerStateChange,
+				},
+			});
+		} else {
+			// YouTube API not ready yet, load video without advanced tracking
+			videoContent.innerHTML = `
+                <iframe
+                    src="https://www.youtube.com/embed/${youtubeVideoId}?rel=0"
+                    title="${video.title}"
+                    class="w-100 h-100"
+                    allowfullscreen
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+                </iframe>
+            `;
+			console.warn("YouTube API not available. Video tracking disabled.");
+		}
+
+		// Show modal
+		videoModal.show();
+
+		// When modal is closed, clean up player and save watch time
+		document
+			.getElementById("videoModal")
+			.addEventListener("hidden.bs.modal", function () {
+				saveCurrentWatchTime();
+				clearInterval(watchTimeInterval);
+				watchTimeInterval = null;
+				videoContent.innerHTML = "";
+				youtubePlayer = null;
+			});
+	}
+
+	// YouTube player ready handler
+	function onPlayerReady(event) {
+		// Start tracking time from current position
+		videoStartTime = event.target.getCurrentTime();
+
+		// Set up interval to update watch time display
+		if (watchTimeInterval) {
+			clearInterval(watchTimeInterval);
+		}
+
+		watchTimeInterval = setInterval(function () {
+			if (youtubePlayer && youtubePlayer.getCurrentTime) {
+				try {
+					const currentTime = youtubePlayer.getCurrentTime();
+					const watchTime = Math.round(currentTime - videoStartTime);
+
+					if (watchTime > 0) {
+						document.getElementById("videoWatchTime").innerHTML = `<i class="fas fa-clock me-1"></i>Watch time: ${formatWatchTime(
+							watchTime
+						)}`;
+					}
+				} catch (e) {
+					console.error("Error updating watch time display:", e);
+				}
+			}
+		}, 1000);
+	}
+
+	// YouTube player state change handler
+	function onPlayerStateChange(event) {
+		// YT.PlayerState.ENDED = 0
+		if (event.data === YT.PlayerState.ENDED) {
+			// Video has ended
+			saveCurrentWatchTime();
+
+			// Auto mark the video as completed
+			if (!userProgress.completedVideos.includes(currentVideoId)) {
+				markVideoAsCompleted(currentVideoId);
+
+				// Update the mark as completed button
+				const completeButton = document.getElementById(
+					"markVideoCompleted"
+				);
+				completeButton.disabled = true;
+				completeButton.innerHTML =
+					'<i class="fas fa-check-circle me-2"></i>Already Completed';
+
+				// Show completion message
+				const videoDescription =
+					document.getElementById("videoDescription");
+				videoDescription.innerHTML += `
+                    <div class="alert alert-success mt-3">
+                        <i class="fas fa-check-circle me-2"></i>Video marked as completed automatically
+                    </div>
+                `;
 			}
 		}
 	}
 
-	// Check if quiz was already completed and show result
-	if (currentCourse.quizCompleted && currentCourse.grade !== null) {
-		const quizForm = document.getElementById("quiz-form");
-		const quizContainer = quizForm
-			? quizForm.closest(".lesson-item")
-			: null;
+	// Function to open quiz in modal
+	function openQuizModal(quiz) {
+		// Set modal title
+		document.getElementById("quizModalLabel").textContent = quiz.title;
 
-		if (quizContainer) {
-			// Create a completed quiz indicator
-			const quizResultDiv = document.createElement("div");
-			quizResultDiv.className = "alert alert-success mt-3";
-			quizResultDiv.innerHTML = `
-        <strong>Quiz completed!</strong> Your score: ${currentCourse.grade}%
-        <button class="btn btn-sm btn-outline-success ms-3" id="retake-quiz">Retake Quiz</button>
-      `;
+		// Get content container
+		const quizContent = document.getElementById("quizModalContent");
+		quizContent.innerHTML = "";
 
-			// Replace the form with the result
-			quizForm.style.display = "none";
-			quizContainer.appendChild(quizResultDiv);
+		// Create quiz form
+		const quizForm = document.createElement("form");
+		quizForm.id = `quiz-form-${quiz.id}`;
+		quizForm.className = "quiz-form";
 
-			// Add retake quiz functionality
-			document
-				.getElementById("retake-quiz")
+		// Check if quiz was already completed
+		const quizResult =
+			userProgress.quizResults && userProgress.quizResults[quiz.id];
+		const isCompleted = quizResult && quizResult.completed;
+
+		// If completed, show results first
+		if (isCompleted) {
+			const resultDiv = document.createElement("div");
+			resultDiv.id = "quiz-completed-result";
+			resultDiv.className =
+				"alert " +
+				(quizResult.score >= 70 ? "alert-success" : "alert-warning");
+			resultDiv.innerHTML = `
+                <h4>${
+					quizResult.score >= 70 ? "Great job!" : "Keep practicing!"
+				}</h4>
+                <p>You scored ${quizResult.score}% on this quiz.</p>
+                <button type="button" class="btn btn-primary retake-quiz-btn">
+                    <i class="fas fa-redo me-2"></i>Retake Quiz
+                </button>
+            `;
+
+			quizContent.appendChild(resultDiv);
+
+			// Handle retake button
+			resultDiv
+				.querySelector(".retake-quiz-btn")
 				.addEventListener("click", function () {
-					quizForm.style.display = "block";
-					quizResultDiv.remove();
+					resultDiv.classList.add("d-none");
+					quizForm.classList.remove("d-none");
 				});
 		}
-	}
 
-	// Load quiz questions for this course
-	const quizQuestions = CourseQuizzes[selectedCourseId] || [];
-	const quizForm = document.getElementById("quiz-form");
-
-	if (quizForm && quizQuestions.length > 0) {
-		// Clear any existing content
-		quizForm.innerHTML = "";
-
-		// Generate quiz questions
-		quizQuestions.forEach((questionData, qIndex) => {
-			const questionDiv = document.createElement("div");
-			questionDiv.className =
-				"quiz-question" + (qIndex > 0 ? " mt-3" : "");
-
-			let optionsHTML = "";
-			questionData.options.forEach((option) => {
-				optionsHTML += `
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="q${
-				qIndex + 1
-			}" id="${option.id}" value="${option.isCorrect}">
-            <label class="form-check-label" for="${option.id}">${
-					option.text
-				}</label>
-          </div>
-        `;
-			});
-
-			questionDiv.innerHTML = `
-        <p>${qIndex + 1}. ${questionData.question}</p>
-        ${optionsHTML}
-      `;
-
-			quizForm.appendChild(questionDiv);
-		});
-
-		// Add submit button
-		const submitBtn = document.createElement("button");
-		submitBtn.type = "submit";
-		submitBtn.className = "btn btn-primary mt-4";
-		submitBtn.textContent = "Submit Answers";
-		quizForm.appendChild(submitBtn);
-
-		// Update quiz title
-		const quizItem = quizForm.closest(".lesson-item");
-		if (quizItem) {
-			const quizTitle = quizItem.querySelector("h3");
-			if (quizTitle) {
-				quizTitle.textContent = `Quiz: Test Your ${currentCourse.title} Knowledge`;
-			}
+		// Add appropriate class to hide form if needed
+		if (isCompleted) {
+			quizForm.classList.add("d-none");
 		}
 
-		// Handle quiz submissions with real checking logic
-		quizForm.addEventListener("submit", function (e) {
-			e.preventDefault();
+		// Create questions
+		if (quiz.questions && quiz.questions.length > 0) {
+			quiz.questions.forEach((question, qIndex) => {
+				const questionDiv = document.createElement("div");
+				questionDiv.className = "mb-4 quiz-question";
 
-			let correctAnswers = 0;
-			let totalQuestions = quizQuestions.length;
+				// Add question text
+				const questionText = document.createElement("p");
+				questionText.className = "fw-bold";
+				questionText.textContent = `${qIndex + 1}. ${
+					question.question
+				}`;
+				questionDiv.appendChild(questionText);
 
-			// Check each answer
-			for (let i = 1; i <= totalQuestions; i++) {
-				const selectedOption = document.querySelector(
-					`input[name="q${i}"]:checked`
+				// Add options
+				if (question.options && question.options.length > 0) {
+					question.options.forEach((option, oIndex) => {
+						const optionDiv = document.createElement("div");
+						optionDiv.className = "form-check";
+
+						const optionId = `quiz-modal-${quiz.id}-q${qIndex}-o${oIndex}`;
+
+						optionDiv.innerHTML = `
+                            <input class="form-check-input" type="radio" name="q${qIndex}" id="${optionId}" value="${oIndex}">
+                            <label class="form-check-label" for="${optionId}">${option}</label>
+                        `;
+
+						questionDiv.appendChild(optionDiv);
+					});
+				}
+
+				quizForm.appendChild(questionDiv);
+			});
+
+			// Add submit button
+			const submitDiv = document.createElement("div");
+			submitDiv.className = "text-center mt-4";
+			submitDiv.innerHTML = `
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-check-circle me-2"></i>Submit Answers
+                </button>
+            `;
+			quizForm.appendChild(submitDiv);
+
+			// Handle quiz submission
+			quizForm.addEventListener("submit", function (e) {
+				e.preventDefault();
+
+				// Calculate score
+				let score = 0;
+				let totalQuestions = quiz.questions.length;
+
+				quiz.questions.forEach((question, qIndex) => {
+					const selectedOption = document.querySelector(
+						`input[name="q${qIndex}"]:checked`
+					);
+					if (
+						selectedOption &&
+						parseInt(selectedOption.value) === question.answer
+					) {
+						score++;
+					}
+				});
+
+				const scorePercent = Math.round((score / totalQuestions) * 100);
+
+				// Save in user progress
+				if (!userProgress.quizResults) userProgress.quizResults = {};
+
+				userProgress.quizResults[quiz.id] = {
+					completed: true,
+					score: scorePercent,
+					date: new Date().toISOString(),
+				};
+
+				// Save progress
+				localStorage.setItem(
+					`progress_${selectedCourseId}`,
+					JSON.stringify(userProgress)
 				);
-				if (selectedOption && selectedOption.value === "true") {
-					correctAnswers++;
+
+				// Show result message in modal footer
+				const resultMsg = document.getElementById("quizResultMsg");
+				resultMsg.innerHTML = `
+                    <div class="alert ${
+						scorePercent >= 70 ? "alert-success" : "alert-warning"
+					} mb-0">
+                        <strong>${
+							scorePercent >= 70
+								? "Great job!"
+								: "Keep practicing!"
+						}</strong>
+                        You scored ${scorePercent}% on this quiz.
+                    </div>
+                `;
+				resultMsg.classList.remove("d-none");
+
+				// Hide the form
+				quizForm.classList.add("d-none");
+
+				// Add a continue button to close the modal
+				const continueBtn = document.createElement("button");
+				continueBtn.type = "button";
+				continueBtn.className = "btn btn-success";
+				continueBtn.innerHTML =
+					'<i class="fas fa-check me-2"></i>Continue';
+				continueBtn.addEventListener("click", function () {
+					quizModal.hide();
+
+					// Update the quiz item in the course list
+					const quizItem = document.querySelector(
+						`.quiz-item[data-quiz-id="${quiz.id}"]`
+					);
+					if (quizItem) {
+						quizItem.classList.add("list-group-item-success");
+						const title = quizItem.querySelector("h5");
+						if (title) {
+							const badge = title.querySelector(".badge");
+							if (badge) {
+								badge.textContent = `Completed (Score: ${scorePercent}%)`;
+							} else {
+								const newBadge = document.createElement("span");
+								newBadge.className = "badge bg-success ms-2";
+								newBadge.textContent = `Completed (Score: ${scorePercent}%)`;
+								title.appendChild(newBadge);
+							}
+						}
+
+						// Update the button text
+						const button = quizItem.querySelector(".take-quiz-btn");
+						if (button) {
+							button.innerHTML =
+								'<i class="fas fa-redo me-1"></i> Retake Quiz';
+							button.classList.remove("btn-primary");
+							button.classList.add("btn-outline-primary");
+						}
+					}
+
+					// Recalculate progress
+					calculateProgress(currentCourse, userProgress);
+				});
+
+				// Clear any existing continue button
+				const modalFooter = document.querySelector(
+					"#quizModal .modal-footer"
+				);
+				const existingContinueBtn =
+					modalFooter.querySelector(".btn-success");
+				if (existingContinueBtn) {
+					existingContinueBtn.remove();
+				}
+
+				// Add the button before the close button
+				const closeBtn = modalFooter.querySelector(".btn-secondary");
+				if (closeBtn) {
+					modalFooter.insertBefore(continueBtn, closeBtn);
+				} else {
+					modalFooter.appendChild(continueBtn);
+				}
+			});
+		}
+
+		// Add form to content
+		quizContent.appendChild(quizForm);
+
+		// Show modal
+		quizModal.show();
+
+		// When modal is hidden, clean up
+		document
+			.getElementById("quizModal")
+			.addEventListener("hidden.bs.modal", function () {
+				document
+					.getElementById("quizResultMsg")
+					.classList.add("d-none");
+
+				// Remove any continue buttons
+				const continueBtn = document.querySelector(
+					"#quizModal .modal-footer .btn-success"
+				);
+				if (continueBtn) {
+					continueBtn.remove();
+				}
+			});
+	}
+
+	// Function to mark a video as completed
+	function markVideoAsCompleted(videoId) {
+		console.log("Marking video as completed:", videoId);
+
+		// Get current progress
+		let userProgress = JSON.parse(
+			localStorage.getItem(`progress_${selectedCourseId}`)
+		) || {
+			completedVideos: [],
+			quizResults: {},
+			overallProgress: 0,
+			totalWatchTime: 0,
+		};
+
+		// Add video to completed list if not already there
+		if (!userProgress.completedVideos.includes(videoId)) {
+			userProgress.completedVideos.push(videoId);
+
+			// Update in localStorage
+			localStorage.setItem(
+				`progress_${selectedCourseId}`,
+				JSON.stringify(userProgress)
+			);
+
+			// Update UI
+			const videoItem = document.querySelector(
+				`.video-item[data-video-id="${videoId}"]`
+			);
+			if (videoItem) {
+				videoItem.classList.add(
+					"list-group-item-success",
+					"video-completed"
+				);
+
+				// Add completed badge if not exists
+				let title = videoItem.querySelector("h5");
+				if (title && !title.querySelector(".badge")) {
+					const badge = document.createElement("span");
+					badge.className = "badge bg-success ms-2 video-badge";
+					badge.textContent = "Completed";
+					title.appendChild(badge);
 				}
 			}
 
-			// Calculate grade
-			const grade = Math.round((correctAnswers / totalQuestions) * 100);
-
-			// Update course in storage
-			StorageManager.updateQuizGrade(selectedCourseId, grade);
-
-			// Show results
-			alert(`Quiz completed! Your score: ${grade}%`);
-
-			// Refresh the page to show updated state
-			window.location.reload();
-		});
+			// Recalculate progress
+			calculateProgress(currentCourse, userProgress);
+		}
 	}
 });

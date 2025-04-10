@@ -10,6 +10,9 @@ class GeminiChatWidget {
 		this.apiKey = config.gemini.getApiKey(); // Get from config
 		this.isOpen = false;
 		this.initWidget();
+
+		// Listen for API key changes
+		window.addEventListener('gemini_api_key_updated', this.handleApiKeyUpdate.bind(this));
 	}
 
 	initWidget() {
@@ -171,22 +174,7 @@ class GeminiChatWidget {
 
 		// Render each message in the history
 		this.chatHistory.forEach((message) => {
-			const messageEl = document.createElement("div");
-			messageEl.className = `gemini-chat-message ${message.role}`;
-			messageEl.innerHTML = `
-        <div class="gemini-chat-avatar">
-          ${
-				message.role === "user"
-					? '<img src="../assets/icons/user.png">'
-					: '<img src="../assets/icons/gemini-logo.png">'
-			}
-        </div>
-        <div class="gemini-chat-bubble">${this.formatMessageContent(
-			message.content
-		)}</div>
-      `;
-
-			this.messagesContainer.appendChild(messageEl);
+			this.addMessage(message);
 		});
 
 		// Scroll to bottom
@@ -242,18 +230,31 @@ class GeminiChatWidget {
 		// Create message element
 		const messageEl = document.createElement("div");
 		messageEl.className = `gemini-chat-message ${message.role}`;
-		messageEl.innerHTML = `
-      <div class="gemini-chat-avatar">
-        ${
+
+		// Create avatar container
+		const avatarContainer = document.createElement("div");
+		avatarContainer.className = "gemini-chat-avatar";
+
+		// Add avatar image with proper sizing
+		const avatarImg = document.createElement("img");
+		avatarImg.src =
 			message.role === "user"
-				? '<img src="../assets/icons/user.png">'
-				: '<img src="../assets/icons/gemini-logo.png">'
-		}
-      </div>
-      <div class="gemini-chat-bubble">${this.formatMessageContent(
-			message.content
-		)}</div>
-    `;
+				? "../images/icons/user-icon.png" // User icon path
+				: "../images/icons/gemini-icon.png"; // Gemini icon path
+		avatarImg.alt = message.role === "user" ? "User" : "Gemini AI";
+		avatarImg.className = `gemini-avatar ${
+			message.role === "user" ? "gemini-user-avatar" : "gemini-ai-avatar"
+		}`;
+
+		// Add message bubble
+		const messageBubble = document.createElement("div");
+		messageBubble.className = "gemini-chat-bubble";
+		messageBubble.innerHTML = this.formatMessageContent(message.content);
+
+		// Assemble the message components
+		avatarContainer.appendChild(avatarImg);
+		messageEl.appendChild(avatarContainer);
+		messageEl.appendChild(messageBubble);
 
 		// Add to UI
 		this.messagesContainer.appendChild(messageEl);
@@ -284,7 +285,7 @@ class GeminiChatWidget {
 		indicatorEl.dataset.id = id;
 		indicatorEl.innerHTML = `
       <div class="gemini-chat-avatar">
-        <img src="../assets/icons/gemini-logo.png">
+        <img src="../images/icons/gemini-icon.png" class="gemini-avatar gemini-ai-avatar">
       </div>
       <div class="gemini-chat-bubble">
         <div class="gemini-chat-thinking">
@@ -422,6 +423,24 @@ If you don't know something specific about the course, you can provide general e
 			Math.abs(userMessage.length % responses.length)
 		);
 		return responses[randomIndex];
+	}
+
+	// Handle API key updates (e.g., from settings page)
+	handleApiKeyUpdate(event) {
+		this.apiKey = config.gemini.getApiKey();
+		if (this.apiKey && this.apiKey.trim() !== "") {
+			// Show notification that API key was updated
+			this.addMessage({
+				role: "assistant",
+				content: "✅ Gemini API key has been updated and is now active. You can ask questions about this course!"
+			});
+		} else {
+			// Warn that API key is missing or invalid
+			this.addMessage({
+				role: "assistant",
+				content: "⚠️ Gemini API key has been removed. Please add a valid API key in Settings to continue using the AI assistant."
+			});
+		}
 	}
 }
 
